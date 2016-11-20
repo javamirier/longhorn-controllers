@@ -46,7 +46,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "PurchaseId,Date,TotalPrice,Tax,IsComplete")] Purchase purchase)
+        public ActionResult Create([Bind(Include = "PurchaseId,Date,Subtotal,IsComplete")] Purchase purchase)
         {
             if (ModelState.IsValid)
             {
@@ -70,6 +70,10 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+
+            ViewBag.Taxes = CalculateTax(purchase);
+            ViewBag.Total = CalculateTotal(purchase);
+
             return View(purchase);
         }
 
@@ -78,7 +82,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "PurchaseId,Date,TotalPrice,Tax,IsComplete")] Purchase purchase)
+        public ActionResult Edit([Bind(Include = "PurchaseId,Date,Subtotal,IsComplete")] Purchase purchase)
         {
             if (ModelState.IsValid)
             {
@@ -86,6 +90,10 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+
+            ViewBag.Taxes = CalculateTax(purchase);
+            ViewBag.Total = CalculateTotal(purchase);
+
             return View(purchase);
         }
 
@@ -122,6 +130,25 @@ namespace LonghornMusic.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        public Decimal CalculateTax(Purchase purchase)
+        {
+            Decimal taxes = 0;
+            Decimal TaxRate = 0.0825m;
+
+            taxes = purchase.Subtotal * TaxRate;
+
+            return taxes;
+        }
+
+        public Decimal CalculateTotal(Purchase purchase)
+        {
+            Decimal total = 0;
+
+            total = purchase.Subtotal + CalculateTax(purchase);
+
+            return total;
         }
     }
 }
