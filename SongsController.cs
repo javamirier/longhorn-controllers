@@ -12,6 +12,71 @@ namespace LonghornMusic.Controllers
 {
     public class SongsController : Controller
     {
+
+        public SelectList GetAllAlbums()
+        {
+            var query = from a in db.Albums
+                        orderby a.AlbumName
+                        select a;
+
+            List<Album> allAlbums = query.ToList();
+            SelectList allAlbumsList = new SelectList(allAlbums, "AlbumId", "AlbumName");
+            return allAlbumsList;
+        }
+
+        public SelectList GetAllArtists()
+        {
+            var query = from a in db.Artists
+                        orderby a.ArtistName
+                        select a;
+
+            List<Artist> allArtists = query.ToList();
+            SelectList allArtistsList = new SelectList(allArtists, "ArtistId", "ArtistName");
+            return allArtistsList;
+        }
+
+        public SelectList GetAllGenres()
+        {
+            var query = from g in db.Genres
+                        orderby g.GenreName
+                        select g;
+
+            List<Genre> allGenres = query.ToList();
+            SelectList allGenresList = new SelectList(allGenres, "GenreId", "GenreName");
+            return allGenresList;
+        }
+
+        public MultiSelectList GetAllArtists(Song song)
+        {
+            var query = from a in db.Artists
+                         orderby a.ArtistName
+                         select a;
+            List<Artist> allArtists = query.ToList();
+            List<Artist> SelectedArtists = new List<Artist>();
+            foreach (Artist a in song.SongArtists)
+            {
+                //used to be SelectedMembers.Add(m.Id);
+                SelectedArtists.Add(a);
+            }
+            MultiSelectList allArtistsList = new MultiSelectList(allArtists, "ArtistId", "ArtistName", SelectedArtists);
+            return allArtistsList;
+        }
+
+        public MultiSelectList GetAllGenres(Song song)
+        {
+            var query = from g in db.Genres
+                        orderby g.GenreName
+                        select g;
+            List<Genre> allGenres = query.ToList();
+            List<Genre> SelectedGenres = new List<Genre>();
+            foreach (Genre g in song.SongGenres)
+            {
+                //used to be SelectedMembers.Add(m.Id);
+                SelectedGenres.Add(g);
+            }
+            MultiSelectList allGenresList = new MultiSelectList(allGenres, "GenreId", "GenreName", SelectedGenres);
+            return allGenresList;
+        }
         private AppDbContext db = new AppDbContext();
 
         // GET: Songs
@@ -38,6 +103,9 @@ namespace LonghornMusic.Controllers
         // GET: Songs/Create
         public ActionResult Create()
         {
+            ViewBag.SelectedArtists = GetAllArtists();
+            ViewBag.SelectedGenres = GetAllGenres();
+            ViewBag.AllAlbums = GetAllAlbums();
             return View();
         }
 
@@ -46,7 +114,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "SongId,SongName")] Song song)
+        public ActionResult Create([Bind(Include = "SongId,SongName,SelectedArtists")] Song song, string[] SelectedArtists, string[] SelectedGenres, Int32 AlbumId)
         {
             if (ModelState.IsValid)
             {
@@ -54,7 +122,8 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
+            ViewBag.SelectedArtists = GetAllArtists(song);
+            //TODO: Add viewbag for AllGenres 
             return View(song);
         }
 
