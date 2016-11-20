@@ -12,6 +12,7 @@ namespace LonghornMusic.Controllers
 {
     public class SongsController : Controller
     {
+        //TO DO: figure out where else to call AverageRating() - possibly in gets and before search methods
 
         public SelectList GetAllAlbums()
         {
@@ -51,13 +52,16 @@ namespace LonghornMusic.Controllers
             var query = from a in db.Artists
                          orderby a.ArtistName
                          select a;
+
             List<Artist> allArtists = query.ToList();
             List<Artist> SelectedArtists = new List<Artist>();
+
             foreach (Artist a in song.SongArtists)
             {
                 //used to be SelectedMembers.Add(m.Id);
                 SelectedArtists.Add(a);
             }
+
             MultiSelectList allArtistsList = new MultiSelectList(allArtists, "ArtistId", "ArtistName", SelectedArtists);
             return allArtistsList;
         }
@@ -67,16 +71,46 @@ namespace LonghornMusic.Controllers
             var query = from g in db.Genres
                         orderby g.GenreName
                         select g;
+
             List<Genre> allGenres = query.ToList();
             List<Genre> SelectedGenres = new List<Genre>();
+
             foreach (Genre g in song.SongGenres)
             {
                 //used to be SelectedMembers.Add(m.Id);
                 SelectedGenres.Add(g);
             }
+
             MultiSelectList allGenresList = new MultiSelectList(allGenres, "GenreId", "GenreName", SelectedGenres);
             return allGenresList;
         }
+
+        public decimal AverageRating(Song song)
+        {
+            var query = from r in db.SongReviews
+                        orderby r.ReviewedSong.SongName
+                        select r;
+
+            decimal total_rating = 0;
+            decimal avg_rating = 0;
+            decimal count = 0;
+            
+            foreach(SongReview r in song.SongReviews)
+            {
+                total_rating += r.SongScore;
+                count += 1;
+            }
+
+            if(count > 0)
+            {
+                avg_rating = total_rating / count;
+            }
+           
+            return avg_rating;
+
+        }
+
+
         private AppDbContext db = new AppDbContext();
 
         // GET: Songs
@@ -97,6 +131,8 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+
+            song.SongRating = AverageRating(song);
             return View(song);
         }
 
@@ -122,8 +158,12 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+
             ViewBag.SelectedArtists = GetAllArtists(song);
-            //TODO: Add viewbag for AllGenres 
+            ViewBag.SelectedGenres = GetAllGenres();
+            ViewBag.AllAlbums = GetAllAlbums();
+            song.SongRating = AverageRating(song);
+
             return View(song);
         }
 
