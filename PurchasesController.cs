@@ -141,9 +141,9 @@ namespace LonghornMusic.Controllers
             var query = from p in db.Promotions
                         orderby p.DiscountedSongs
                         select p;
-
-            decimal sub = 0;
+   
             List<Promotion> allPromotions = query.ToList();
+            decimal sub = 0;
 
             foreach(ItemDetail id in purchase.ItemDetails)
             {
@@ -157,12 +157,11 @@ namespace LonghornMusic.Controllers
                     else
                     {
                         sub += id.Song.SongPrice;
-                    }
-
-                    sub = Math.Round(sub, 2);
+                    }                    
                 }
             }
 
+            sub = Math.Round(sub, 2);
             purchase.Subtotal = sub;         
         }
 
