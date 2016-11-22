@@ -12,6 +12,51 @@ namespace LonghornMusic.Controllers
 {
     public class AlbumsController : Controller
     {
+
+        public List<List<string>> AlbumsReport()
+        {
+            var query = from a in db.Albums
+                        orderby a.AlbumName
+                        select a;
+
+            List<Album> allAlbums = query.ToList();
+
+            List<string> albumDetail = new List<string>();
+            List<List<string>> allAlbumDetails = new List<List<string>>();
+
+            foreach (Album a in allAlbums)
+            {
+                string albumName = a.AlbumName;
+                string albumFreqStr = "";
+                string albumRevStr = "";
+
+                Decimal freq = 0;
+                Decimal sumPrice = 0;
+
+                foreach (ItemDetail id in a.AlbumPurchaseDetails)
+                {
+                    if (a.AlbumId == id.Album.AlbumId)
+                    {
+                        freq += 1;
+                        sumPrice += id.PurchasePrice;
+                    }
+                }
+
+                sumPrice = Math.Round(sumPrice, 2);
+                albumFreqStr = freq.ToString();
+                albumRevStr = "$" + sumPrice.ToString();
+
+                albumDetail.Add(albumName);
+                albumDetail.Add(albumFreqStr);
+                albumDetail.Add(albumRevStr);
+
+                allAlbumDetails.Add(albumDetail);
+            }
+
+            return allAlbumDetails;
+        }
+
+
         private AppDbContext db = new AppDbContext();
 
         // GET: Albums
