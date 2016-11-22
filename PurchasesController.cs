@@ -12,6 +12,8 @@ namespace LonghornMusic.Controllers
 {
     public class PurchasesController : Controller
     {
+        // TO DO - not 100% sure where else we might need to call CalculateSubtotal to update the property
+
         private AppDbContext db = new AppDbContext();
 
         // GET: Purchases
@@ -71,6 +73,7 @@ namespace LonghornMusic.Controllers
                 return HttpNotFound();
             }
 
+            CalculateSubtotal(purchase);
             ViewBag.Taxes = CalculateTax(purchase);
             ViewBag.Total = CalculateTotal(purchase);
 
@@ -91,6 +94,7 @@ namespace LonghornMusic.Controllers
                 return RedirectToAction("Index");
             }
 
+            CalculateSubtotal(purchase);
             ViewBag.Taxes = CalculateTax(purchase);
             ViewBag.Total = CalculateTotal(purchase);
 
@@ -132,19 +136,51 @@ namespace LonghornMusic.Controllers
             base.Dispose(disposing);
         }
 
-        public Decimal CalculateTax(Purchase purchase)
+        public void CalculateSubtotal(Purchase purchase)
         {
-            Decimal taxes = 0;
-            Decimal TaxRate = 0.0825m;
+            var query = from p in db.Promotions
+                        orderby p.DiscountedSongs
+                        select p;
+
+            decimal sub = 0;
+            List<Promotion> allPromotions = query.ToList();
+
+            foreach(ItemDetail id in purchase.ItemDetails)
+            {
+                foreach(Promotion p in allPromotions)
+                {
+                    if(p.DiscountedSongs.Contains(id.Song))
+                    {
+                        sub += (100 - p.DiscountPercentage) / 100 * id.Song.SongPrice;
+                    }
+
+                    else
+                    {
+                        sub += id.Song.SongPrice;
+                    }
+
+                    sub = Math.Round(sub, 2);
+                }
+            }
+
+            purchase.Subtotal = sub;         
+        }
+
+        public decimal CalculateTax(Purchase purchase)
+        {
+            CalculateSubtotal(purchase);
+            decimal taxes = 0;
+            decimal TaxRate = 0.0825m;
 
             taxes = purchase.Subtotal * TaxRate;
 
             return taxes;
         }
 
-        public Decimal CalculateTotal(Purchase purchase)
+        public decimal CalculateTotal(Purchase purchase)
         {
-            Decimal total = 0;
+            CalculateSubtotal(purchase);
+            decimal total = 0;
 
             total = purchase.Subtotal + CalculateTax(purchase);
 
