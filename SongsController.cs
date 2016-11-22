@@ -130,7 +130,7 @@ namespace LonghornMusic.Controllers
                 Decimal freq = 0;
                 Decimal sumPrice = 0;
 
-                foreach (ItemDetail id in s.SongPurchaseDetail)
+                foreach (ItemDetail id in s.SongPurchaseDetails)
                 {
                     if (s.SongId == id.Song.SongId)
                     {
