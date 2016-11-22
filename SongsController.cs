@@ -110,6 +110,50 @@ namespace LonghornMusic.Controllers
 
         }
 
+        public List<List<string>> SongsReport()
+        {
+            var query = from s in db.Songs
+                        orderby s.SongName
+                        select s;
+
+            List<Song> allSongs = query.ToList();
+
+            List<string> songDetail = new List<string>();
+            List<List<string>> allSongDetails = new List<List<string>>();
+
+            foreach(Song s in allSongs)
+            {
+                string songName = s.SongName;
+                string songFreqStr = "";
+                string songRevStr = "";
+
+                Decimal freq = 0;
+                Decimal sumPrice = 0;
+
+                foreach (ItemDetail id in s.SongPurchaseDetail)
+                {
+                    if (s.SongId == id.Song.SongId)
+                    {
+                        freq += 1;
+                        sumPrice += id.PurchasePrice;
+                    }
+                }
+
+                sumPrice = Math.Round(sumPrice, 2);
+                songFreqStr = freq.ToString();
+                songRevStr = "$" + sumPrice.ToString();
+                
+                songDetail.Add(songName);
+                songDetail.Add(songFreqStr);
+                songDetail.Add(songRevStr);
+
+                allSongDetails.Add(songDetail);
+                
+            }
+
+            return allSongDetails;
+        }
+
 
         private AppDbContext db = new AppDbContext();
 
@@ -232,5 +276,6 @@ namespace LonghornMusic.Controllers
             }
             base.Dispose(disposing);
         }
+
     }
 }
