@@ -85,7 +85,7 @@ namespace LonghornMusic.Controllers
             return allGenresList;
         }
 
-        public decimal AverageRating(Song song)
+        public void AverageRating(Song song)
         {
             var query = from r in db.SongReviews
                         orderby r.ReviewedSong.SongName
@@ -106,9 +106,9 @@ namespace LonghornMusic.Controllers
                 avg_rating = total_rating / count;
             }
            
-            return avg_rating;
-
+            song.SongRating = avg_rating;
         }
+
 
         private AppDbContext db = new AppDbContext();
 
@@ -131,7 +131,7 @@ namespace LonghornMusic.Controllers
                 return HttpNotFound();
             }
 
-            song.SongRating = AverageRating(song);
+            AverageRating(song);
             return View(song);
         }
 
@@ -158,10 +158,10 @@ namespace LonghornMusic.Controllers
                 return RedirectToAction("Index");
             }
 
+            AverageRating(song);
             ViewBag.SelectedArtists = GetAllArtists(song);
             ViewBag.SelectedGenres = GetAllGenres();
             ViewBag.AllAlbums = GetAllAlbums();
-            song.SongRating = AverageRating(song);
 
             return View(song);
         }
@@ -178,6 +178,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+            AverageRating(song);
             return View(song);
         }
 
@@ -194,6 +195,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            AverageRating(song);
             return View(song);
         }
 
