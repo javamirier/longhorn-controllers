@@ -12,6 +12,37 @@ namespace LonghornMusic.Controllers
 {
     public class ArtistsController : Controller
     {
+
+        public SelectList GetAllGenres()
+        {
+            var query = from g in db.Genres
+                        orderby g.GenreName
+                        select g;
+
+            List<Genre> allGenres = query.ToList();
+            SelectList allGenresList = new SelectList(allGenres, "GenreId", "GenreName");
+            return allGenresList;
+        }
+
+        public MultiSelectList GetAllGenres(Artist artist)
+        {
+            var query = from g in db.Genres
+                        orderby g.GenreName
+                        select g;
+
+            List<Genre> allGenres = query.ToList();
+            List<Genre> SelectedGenres = new List<Genre>();
+
+            foreach (Genre g in artist.ArtistGenres)
+            {
+                //used to be SelectedMembers.Add(m.Id);
+                SelectedGenres.Add(g);
+            }
+
+            MultiSelectList allGenresList = new MultiSelectList(allGenres, "GenreId", "GenreName", SelectedGenres);
+            return allGenresList;
+        }
+
         private AppDbContext db = new AppDbContext();
 
         // GET: Artists
@@ -38,6 +69,7 @@ namespace LonghornMusic.Controllers
         // GET: Artists/Create
         public ActionResult Create()
         {
+            ViewBag.SelectedGenres = GetAllGenres();
             return View();
         }
 
@@ -46,8 +78,16 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ArtistId,ArtistName,ArtistRating")] Artist artist)
+        public ActionResult Create([Bind(Include = "ArtistId,ArtistName,ArtistRating")] Artist artist, Int32[] SelectedGenres)
         {
+            if (SelectedGenres != null)
+            {
+                foreach (Int32 Id in SelectedGenres)
+                {
+                    Genre GenreToAdd = db.Genres.Find(Id);
+                    artist.ArtistGenres.Add(GenreToAdd);
+                }
+            }
             if (ModelState.IsValid)
             {
                 db.Artists.Add(artist);

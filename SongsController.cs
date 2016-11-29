@@ -85,6 +85,25 @@ namespace LonghornMusic.Controllers
             return allGenresList;
         }
 
+        public MultiSelectList GetAllAlbums(Song song)
+        {
+            var query = from a in db.Albums
+                        orderby a.AlbumName
+                        select a;
+
+            List<Album> allAlbums = query.ToList();
+            List<Album> SelectedAlbums = new List<Album>();
+
+            foreach (Album a in song.SongAlbums)
+            {
+                //used to be SelectedMembers.Add(m.Id);
+                SelectedAlbums.Add(a);
+            }
+
+            MultiSelectList allAlbumsList = new MultiSelectList(allAlbums, "AlbumId", "AlbumName", SelectedAlbums);
+            return allAlbumsList;
+        }
+
         public void AverageRating(Song song)
         {
             var query = from r in db.SongReviews
@@ -149,8 +168,30 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "SongId,SongName,SelectedArtists")] Song song, string[] SelectedArtists, string[] SelectedGenres, Int32 AlbumId)
+        public ActionResult Create([Bind(Include = "SongId,SongName,SelectedArtists,SongPrice")] Song song, Int32[] SelectedArtists, Int32[] SelectedGenres, Int32[] SelectedAlbums, string SongPrice)
         {
+            //TODO: Fix method attaching; this only works with 1 album per song, not many 
+            //Album SelectedAlbum = db.Albums.Find(AlbumId);
+            //song.SongAlbums.Add(SelectedAlbum);
+            Decimal SongPriceDec = System.Convert.ToDecimal(SongPrice);
+            song.SongPrice = SongPriceDec;
+            //WHY THE FUCK DO YOU WORK 
+            foreach (Int32 Id in SelectedGenres)
+            {
+                Genre GenreToAdd = db.Genres.Find(Id);
+                song.SongGenres.Add(GenreToAdd);
+            }
+            //TODO: Implement the GET/POST viewbag lines and view changes to make this appropriate 
+            foreach (Int32 Id in SelectedArtists)
+            {
+                Artist ArtistToAdd = db.Artists.Find(Id);
+                song.SongArtists.Add(ArtistToAdd);
+            }
+            foreach (Int32 Id in SelectedAlbums)
+            {
+                Album AlbumToAdd = db.Albums.Find(Id);
+                song.SongAlbums.Add(AlbumToAdd);
+            }
             if (ModelState.IsValid)
             {
                 db.Songs.Add(song);
@@ -160,8 +201,8 @@ namespace LonghornMusic.Controllers
 
             AverageRating(song);
             ViewBag.SelectedArtists = GetAllArtists(song);
-            ViewBag.SelectedGenres = GetAllGenres();
-            ViewBag.AllAlbums = GetAllAlbums();
+            ViewBag.SelectedGenres = GetAllGenres(song);
+            ViewBag.AllAlbums = GetAllAlbums(song);
 
             return View(song);
         }
@@ -179,6 +220,9 @@ namespace LonghornMusic.Controllers
                 return HttpNotFound();
             }
             AverageRating(song);
+            ViewBag.AllArtists = GetAllArtists(song);
+            ViewBag.AllAlbums = GetAllAlbums(song);
+            ViewBag.AllGenres = GetAllGenres(song);
             return View(song);
         }
 
@@ -187,15 +231,51 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "SongId,SongName")] Song song)
+        public ActionResult Edit([Bind(Include = "SongId,SongName,SelectedArtists,SongPrice")] Song song, Int32[] SelectedArtists, Int32[] SelectedGenres, Int32[] SelectedAlbums, Decimal SongPrice)
         {
             if (ModelState.IsValid)
             {
+                Song songToChange = db.Songs.Find(song.SongId);
+                //TODO: Y u no work 
+                songToChange.SongArtists.Clear();
+                songToChange.SongGenres.Clear();
+                songToChange.SongAlbums.Clear();
+                if (SelectedArtists != null)
+                {
+                    foreach (Int32 Id in SelectedArtists)
+                    {
+                        Artist artistToAdd = db.Artists.Find(Id);
+                        songToChange.SongArtists.Add(artistToAdd);
+                    }
+                }
+                if (SelectedGenres != null)
+                {
+                    foreach (Int32 Id in SelectedGenres)
+                    {
+                        Genre genreToAdd = db.Genres.Find(Id);
+                        songToChange.SongGenres.Add(genreToAdd);
+                    }
+                }
+                if (SelectedAlbums != null)
+                {
+                    foreach (Int32 Id in SelectedAlbums)
+                    {
+                        Album albumToAdd = db.Albums.Find(Id);
+                        songToChange.SongAlbums.Add(albumToAdd);
+                    }
+                }
+
+                songToChange.SongName = song.SongName;
+                songToChange.SongPrice = song.SongPrice;
+
                 db.Entry(song).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
             AverageRating(song);
+            ViewBag.AllArtists = GetAllArtists(song);
+            ViewBag.AllAlbums = GetAllAlbums(song);
+            ViewBag.AllGenres = GetAllGenres(song);
             return View(song);
         }
 
