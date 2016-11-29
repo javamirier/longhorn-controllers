@@ -63,6 +63,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+            AverageRating(artist);
             return View(artist);
         }
 
@@ -94,7 +95,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
+            AverageRating(artist);
             return View(artist);
         }
 
@@ -110,6 +111,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+            AverageRating(artist);
             return View(artist);
         }
 
@@ -126,6 +128,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            AverageRating(artist);
             return View(artist);
         }
 
@@ -162,6 +165,30 @@ namespace LonghornMusic.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        public void AverageRating(Artist artist)
+        {
+            var query = from r in db.ArtistReviews
+                        orderby r.ReviewedArtist.ArtistName
+                        select r;
+
+            decimal total_rating = 0;
+            decimal avg_rating = 0;
+            decimal count = 0;
+
+            foreach (ArtistReview r in artist.ArtistReviews)
+            {
+                total_rating += r.ArtistScore;
+                count += 1;
+            }
+
+            if (count > 0)
+            {
+                avg_rating = total_rating / count;
+            }
+
+            artist.ArtistRating = avg_rating;
         }
     }
 }

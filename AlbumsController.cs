@@ -57,7 +57,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
+            AverageRating(album);
             ViewBag.AllArtists = GetAllArtists();
             ViewBag.AllGenres = GetAllGenres();
             return View(album);
@@ -75,6 +75,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+            AverageRating(album);
             ViewBag.SelectedArtists = GetAllArtists(album);
             ViewBag.SelectedGenres = GetAllGenres(album);
             return View(album);
@@ -93,6 +94,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            AverageRating(album);
             ViewBag.SelectedArtists = GetAllArtists(album);
             ViewBag.SelectedGenres = GetAllGenres(album);
             return View(album);
@@ -190,5 +192,30 @@ namespace LonghornMusic.Controllers
             MultiSelectList allGenresList = new MultiSelectList(allGenres, "GenreId", "GenreName", SelectedGenres);
             return allGenresList;
         }
+
+        public void AverageRating(Album album)
+        {
+            var query = from r in db.AlbumReviews
+                        orderby r.AlbumToBeReviewed.AlbumName
+                        select r;
+
+            decimal total_rating = 0;
+            decimal avg_rating = 0;
+            decimal count = 0;
+
+            foreach (AlbumReview r in album.AlbumReviews)
+            {
+                total_rating += r.AlbumScore;
+                count += 1;
+            }
+
+            if (count > 0)
+            {
+                avg_rating = total_rating / count;
+            }
+
+            album.AlbumRating = avg_rating;
+        }
+
     }
 }
