@@ -39,6 +39,8 @@ namespace LonghornMusic.Controllers
         // GET: Albums/Create
         public ActionResult Create()
         {
+            ViewBag.AllArtists = GetAllArtists();
+            ViewBag.AllGenres = GetAllGenres();
             return View();
         }
 
@@ -56,6 +58,8 @@ namespace LonghornMusic.Controllers
                 return RedirectToAction("Index");
             }
 
+            ViewBag.AllArtists = GetAllArtists();
+            ViewBag.AllGenres = GetAllGenres();
             return View(album);
         }
 
@@ -71,6 +75,8 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.SelectedArtists = GetAllArtists(album);
+            ViewBag.SelectedGenres = GetAllGenres(album);
             return View(album);
         }
 
@@ -87,6 +93,8 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            ViewBag.SelectedArtists = GetAllArtists(album);
+            ViewBag.SelectedGenres = GetAllGenres(album);
             return View(album);
         }
 
@@ -123,6 +131,64 @@ namespace LonghornMusic.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        public MultiSelectList GetAllArtists()
+        {
+            var query = from a in db.Artists
+                        orderby a.ArtistName
+                        select a;
+
+            List<Artist> allArtists = query.ToList();
+            SelectList allArtistsList = new SelectList(allArtists, "ArtistId", "ArtistName");
+            return allArtistsList;
+        }
+
+        public MultiSelectList GetAllArtists(Album album)
+        {
+            var query = from a in db.Artists
+                        orderby a.ArtistName
+                        select a;
+
+            List<Artist> allArtists = query.ToList();
+            List<Artist> SelectedArtists = new List<Artist>();
+
+            foreach (Artist a in album.AlbumArtists)
+            {
+                SelectedArtists.Add(a);
+            }
+
+            MultiSelectList allArtistsList = new MultiSelectList(allArtists, "ArtistId", "ArtistName", SelectedArtists);
+            return allArtistsList;
+        }
+
+        public SelectList GetAllGenres()
+        {
+            var query = from g in db.Genres
+                        orderby g.GenreName
+                        select g;
+
+            List<Genre> allGenres = query.ToList();
+            SelectList allGenresList = new SelectList(allGenres, "GenreId", "GenreName");
+            return allGenresList;
+        }
+
+        public MultiSelectList GetAllGenres(Album album)
+        {
+            var query = from g in db.Genres
+                        orderby g.GenreName
+                        select g;
+
+            List<Genre> allGenres = query.ToList();
+            List<Genre> SelectedGenres = new List<Genre>();
+
+            foreach (Genre g in album.AlbumGenres)
+            {
+                SelectedGenres.Add(g);
+            }
+
+            MultiSelectList allGenresList = new MultiSelectList(allGenres, "GenreId", "GenreName", SelectedGenres);
+            return allGenresList;
         }
     }
 }
