@@ -50,21 +50,21 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "AlbumId,AlbumName,AlbumPrice,AlbumSongs,AlbumArtists,AlbumGenres")] Album album, Int32[] SelectedSongs, Int32[] SelectedArtists, Int32[] SelectedGenres, string AlbumPrice)
+        public ActionResult Create([Bind(Include = "AlbumId,AlbumName,AlbumPrice,AlbumSongs,AlbumArtists,AlbumGenres")] Album album, int[] SelectedSongs, int[] SelectedArtists, int[] SelectedGenres, string AlbumPrice)
         {
             Decimal AlbumPriceDec = System.Convert.ToDecimal(AlbumPrice);
             album.AlbumPrice = AlbumPriceDec;
-            foreach (Int32 Id in SelectedArtists)
-            {
-                Artist ArtistToAdd = db.Artists.Find(Id);
-                album.AlbumArtists.Add(ArtistToAdd);
-            }
-            foreach (Int32 Id in SelectedGenres)
+            foreach (int Id in SelectedGenres)
             {
                 Genre GenreToAdd = db.Genres.Find(Id);
                 album.AlbumGenres.Add(GenreToAdd);
             }
-            foreach (Int32 Id in SelectedSongs)
+            foreach (int Id in SelectedArtists)
+            {
+                Artist ArtistToAdd = db.Artists.Find(Id);
+                album.AlbumArtists.Add(ArtistToAdd);
+            }
+            foreach (int Id in SelectedSongs)
             {
                 Song SongToAdd = db.Songs.Find(Id);
                 album.AlbumSongs.Add(SongToAdd);
@@ -97,6 +97,7 @@ namespace LonghornMusic.Controllers
             AverageRating(album);
             ViewBag.SelectedArtists = GetAllArtists(album);
             ViewBag.SelectedGenres = GetAllGenres(album);
+            ViewBag.SelectedSongs = GetAllSongs(album);
             return View(album);
         }
 
@@ -105,17 +106,50 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "AlbumId,AlbumName")] Album album)
+        public ActionResult Edit([Bind(Include = "AlbumId,AlbumName,AlbumPrice")] Album album, Int32[] SelectedArtists, Int32[] SelectedSongs, Int32[] SelectedGenres, Decimal AlbumPrice)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(album).State = EntityState.Modified;
+                Album albumToChange = db.Albums.Find(album.AlbumId);
+                albumToChange.AlbumArtists.Clear();
+                albumToChange.AlbumGenres.Clear();
+                albumToChange.AlbumSongs.Clear();
+                if (SelectedArtists != null)
+                {
+                    foreach (Int32 Id in SelectedArtists)
+                    {
+                        Artist artistToAdd = db.Artists.Find(Id);
+                        albumToChange.AlbumArtists.Add(artistToAdd);
+                    }
+                }
+                if (SelectedGenres != null)
+                {
+                    foreach (Int32 Id in SelectedGenres)
+                    {
+                        Genre genreToAdd = db.Genres.Find(Id);
+                        albumToChange.AlbumGenres.Add(genreToAdd);
+                    }
+                }
+                if (SelectedSongs != null)
+                {
+                    foreach (Int32 Id in SelectedSongs)
+                    {
+                        Song songToAdd = db.Songs.Find(Id);
+                        albumToChange.AlbumSongs.Add(songToAdd);
+                    }
+                }
+
+                albumToChange.AlbumName = album.AlbumName;
+                albumToChange.AlbumPrice = album.AlbumPrice;
+
+                db.Entry(albumToChange).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
             AverageRating(album);
             ViewBag.SelectedArtists = GetAllArtists(album);
             ViewBag.SelectedGenres = GetAllGenres(album);
+            ViewBag.SelectedSongs = GetAllSongs(album);
             return View(album);
         }
 

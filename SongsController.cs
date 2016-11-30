@@ -170,9 +170,7 @@ namespace LonghornMusic.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "SongId,SongName,SongPrice,SongArtists,SongGenres,SongAlbums")] Song song, Int32[] SelectedArtists, Int32[] SelectedGenres, Int32[] SelectedAlbums, string SongPrice)
         {
-            //TODO: Fix method attaching; this only works with 1 album per song, not many 
-            //Album SelectedAlbum = db.Albums.Find(AlbumId);
-            //song.SongAlbums.Add(SelectedAlbum);
+            //DONE: Fix method attaching; this only works with 1 album per song, not many 
             Decimal SongPriceDec = System.Convert.ToDecimal(SongPrice);
             song.SongPrice = SongPriceDec;
             foreach (Int32 Id in SelectedGenres)
@@ -180,7 +178,7 @@ namespace LonghornMusic.Controllers
                 Genre GenreToAdd = db.Genres.Find(Id);
                 song.SongGenres.Add(GenreToAdd);
             }
-            //TODO: Implement the GET/POST viewbag lines and view changes to make this appropriate 
+            //DONE: Implement the GET/POST viewbag lines and view changes to make this appropriate 
             foreach (Int32 Id in SelectedArtists)
             {
                 Artist ArtistToAdd = db.Artists.Find(Id);
@@ -239,9 +237,9 @@ namespace LonghornMusic.Controllers
             {
                 Song songToChange = db.Songs.Find(song.SongId);
                 //TODO: Y u no work 
-                //songToChange.SongArtists.Clear();
-                //songToChange.SongGenres.Clear();
-                //songToChange.SongAlbums.Clear();
+                songToChange.SongArtists.Clear();
+                songToChange.SongGenres.Clear();
+                songToChange.SongAlbums.Clear();
                 if (SelectedArtists != null)
                 {
                     foreach (Int32 Id in SelectedArtists)
@@ -270,7 +268,7 @@ namespace LonghornMusic.Controllers
                 songToChange.SongName = song.SongName;
                 songToChange.SongPrice = song.SongPrice;
 
-                db.Entry(song).State = EntityState.Modified;
+                db.Entry(songToChange).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
