@@ -13,7 +13,7 @@ namespace longhornmusic.Controllers
     {
         private AppDbContext db = new AppDbContext();
         // GET: Search
-        public ActionResult Index(string SearchString)
+        public ActionResult SongsSearch(string SearchString)
         {
             List<Song> SelectedSongs = new List<Song>();
             List<Song> AllSongs = new List<Song>();
