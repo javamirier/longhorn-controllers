@@ -41,6 +41,7 @@ namespace LonghornMusic.Controllers
         {
             ViewBag.AllArtists = GetAllArtists();
             ViewBag.AllGenres = GetAllGenres();
+            ViewBag.AllSongs = GetAllSongs();
             return View();
         }
 
@@ -49,8 +50,25 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "AlbumId,AlbumName")] Album album)
+        public ActionResult Create([Bind(Include = "AlbumId,AlbumName,AlbumPrice,AlbumSongs,AlbumArtists,AlbumGenres")] Album album, Int32[] SelectedSongs, Int32[] SelectedArtists, Int32[] SelectedGenres, string AlbumPrice)
         {
+            Decimal AlbumPriceDec = System.Convert.ToDecimal(AlbumPrice);
+            album.AlbumPrice = AlbumPriceDec;
+            foreach (Int32 Id in SelectedArtists)
+            {
+                Artist ArtistToAdd = db.Artists.Find(Id);
+                album.AlbumArtists.Add(ArtistToAdd);
+            }
+            foreach (Int32 Id in SelectedGenres)
+            {
+                Genre GenreToAdd = db.Genres.Find(Id);
+                album.AlbumGenres.Add(GenreToAdd);
+            }
+            foreach (Int32 Id in SelectedSongs)
+            {
+                Song SongToAdd = db.Songs.Find(Id);
+                album.AlbumSongs.Add(SongToAdd);
+            }
             if (ModelState.IsValid)
             {
                 db.Albums.Add(album);
@@ -58,8 +76,9 @@ namespace LonghornMusic.Controllers
                 return RedirectToAction("Index");
             }
             AverageRating(album);
-            ViewBag.AllArtists = GetAllArtists();
-            ViewBag.AllGenres = GetAllGenres();
+            ViewBag.AllArtists = GetAllArtists(album);
+            ViewBag.AllGenres = GetAllGenres(album);
+            ViewBag.AllSongs = GetAllSongs(album);
             return View(album);
         }
 
@@ -133,6 +152,34 @@ namespace LonghornMusic.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+        public MultiSelectList GetAllSongs()
+        {
+            var query = from s in db.Songs
+                        orderby s.SongName
+                        select s;
+
+            List<Song> allSongs = query.ToList();
+            SelectList allSongsList = new SelectList(allSongs, "SongId", "SongName");
+            return allSongsList;
+        }
+
+        public MultiSelectList GetAllSongs(Album album)
+        {
+            var query = from s in db.Songs
+                        orderby s.SongName
+                        select s;
+
+            List<Song> allSongs = query.ToList();
+            List<Song> SelectedSongs = new List<Song>();
+
+            foreach (Song s in album.AlbumSongs)
+            {
+                SelectedSongs.Add(s);
+            }
+
+            MultiSelectList allSongsList = new MultiSelectList(allSongs, "SongId", "SongName", SelectedSongs);
+            return allSongsList;
         }
 
         public MultiSelectList GetAllArtists()

@@ -27,33 +27,33 @@ namespace LonghornMusic.Controllers
 
         public SelectList GetAllArtists()
         {
-            var query = from a in db.Artists
+            var query2 = from a in db.Artists
                         orderby a.ArtistName
                         select a;
 
-            List<Artist> allArtists = query.ToList();
+            List<Artist> allArtists = query2.ToList();
             SelectList allArtistsList = new SelectList(allArtists, "ArtistId", "ArtistName");
             return allArtistsList;
         }
 
         public SelectList GetAllGenres()
         {
-            var query = from g in db.Genres
+            var query3 = from g in db.Genres
                         orderby g.GenreName
                         select g;
 
-            List<Genre> allGenres = query.ToList();
+            List<Genre> allGenres = query3.ToList();
             SelectList allGenresList = new SelectList(allGenres, "GenreId", "GenreName");
             return allGenresList;
         }
 
         public MultiSelectList GetAllArtists(Song song)
         {
-            var query = from a in db.Artists
+            var query4 = from a in db.Artists
                          orderby a.ArtistName
                          select a;
 
-            List<Artist> allArtists = query.ToList();
+            List<Artist> allArtists = query4.ToList();
             List<Artist> SelectedArtists = new List<Artist>();
 
             foreach (Artist a in song.SongArtists)
@@ -68,11 +68,11 @@ namespace LonghornMusic.Controllers
 
         public MultiSelectList GetAllGenres(Song song)
         {
-            var query = from g in db.Genres
+            var query5 = from g in db.Genres
                         orderby g.GenreName
                         select g;
 
-            List<Genre> allGenres = query.ToList();
+            List<Genre> allGenres = query5.ToList();
             List<Genre> SelectedGenres = new List<Genre>();
 
             foreach (Genre g in song.SongGenres)
@@ -87,11 +87,11 @@ namespace LonghornMusic.Controllers
 
         public MultiSelectList GetAllAlbums(Song song)
         {
-            var query = from a in db.Albums
+            var query6 = from a in db.Albums
                         orderby a.AlbumName
                         select a;
 
-            List<Album> allAlbums = query.ToList();
+            List<Album> allAlbums = query6.ToList();
             List<Album> SelectedAlbums = new List<Album>();
 
             foreach (Album a in song.SongAlbums)
@@ -168,14 +168,13 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "SongId,SongName,SelectedArtists,SongPrice")] Song song, Int32[] SelectedArtists, Int32[] SelectedGenres, Int32[] SelectedAlbums, string SongPrice)
+        public ActionResult Create([Bind(Include = "SongId,SongName,SongPrice,SongArtists,SongGenres,SongAlbums")] Song song, Int32[] SelectedArtists, Int32[] SelectedGenres, Int32[] SelectedAlbums, string SongPrice)
         {
             //TODO: Fix method attaching; this only works with 1 album per song, not many 
             //Album SelectedAlbum = db.Albums.Find(AlbumId);
             //song.SongAlbums.Add(SelectedAlbum);
             Decimal SongPriceDec = System.Convert.ToDecimal(SongPrice);
             song.SongPrice = SongPriceDec;
-            //WHY THE FUCK DO YOU WORK 
             foreach (Int32 Id in SelectedGenres)
             {
                 Genre GenreToAdd = db.Genres.Find(Id);
@@ -187,10 +186,13 @@ namespace LonghornMusic.Controllers
                 Artist ArtistToAdd = db.Artists.Find(Id);
                 song.SongArtists.Add(ArtistToAdd);
             }
-            foreach (Int32 Id in SelectedAlbums)
+            if (SelectedAlbums != null)
             {
-                Album AlbumToAdd = db.Albums.Find(Id);
-                song.SongAlbums.Add(AlbumToAdd);
+                foreach (Int32 Id in SelectedAlbums)
+                {
+                    Album AlbumToAdd = db.Albums.Find(Id);
+                    song.SongAlbums.Add(AlbumToAdd);
+                }
             }
             if (ModelState.IsValid)
             {
@@ -237,9 +239,9 @@ namespace LonghornMusic.Controllers
             {
                 Song songToChange = db.Songs.Find(song.SongId);
                 //TODO: Y u no work 
-                songToChange.SongArtists.Clear();
-                songToChange.SongGenres.Clear();
-                songToChange.SongAlbums.Clear();
+                //songToChange.SongArtists.Clear();
+                //songToChange.SongGenres.Clear();
+                //songToChange.SongAlbums.Clear();
                 if (SelectedArtists != null)
                 {
                     foreach (Int32 Id in SelectedArtists)
@@ -304,6 +306,15 @@ namespace LonghornMusic.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
+
+        //None of this works; figure out how to make it work 
+        //[HttpPost, ActionName("AddToCart")]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult AddToCart(int Id)
+        //{
+        //    Song song = db.Songs.Find(Id);
+            
+        //}
 
         protected override void Dispose(bool disposing)
         {
