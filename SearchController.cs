@@ -8,12 +8,11 @@ using LonghornMusic.Models;
 
 namespace LonghornMusic.Controllers
 {
+    public enum GreaterOrLess { GreaterThan, LessThan };
+
     public class SearchController : Controller
     {
         private AppDbContext db = new AppDbContext();
-
-        public enum GreaterOrLess { GreaterThan, LessThan };
-
 
         public ActionResult Index()
         {
@@ -22,6 +21,28 @@ namespace LonghornMusic.Controllers
 
 
         // GET: Song Search
+        public ActionResult SongsSearch()
+        {
+            ViewBag.AllGenres = GetAllGenres();
+            return View();
+        }
+
+        // GET: Album Search
+        public ActionResult AlbumsSearch()
+        {
+            ViewBag.AllGenres = GetAllGenres();
+            return View();
+        }
+
+        // GET: Artist Search
+        public ActionResult ArtistsSearch()
+        {
+            ViewBag.AllGenres = GetAllGenres();
+            return View();
+        }
+
+
+        // POST: Song Search
         public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
         {
             List<Song> SelectedSongs = new List<Song>();
@@ -97,7 +118,8 @@ namespace LonghornMusic.Controllers
         }
 
 
-        // GET: Album Search
+
+        // POST: Album Search
         public ActionResult AlbumsSearch(string NameSearchString, string ArtistSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
         {
             List<Album> SelectedAlbums = new List<Album>();
@@ -168,6 +190,71 @@ namespace LonghornMusic.Controllers
         }
 
 
+
+        // POST: Artist Search
+        public ActionResult ArtistSearch(string NameSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
+        {
+            List<Artist> SelectedArtists = new List<Artist>();
+            List<Artist> AllArtists = new List<Artist>();
+
+            var query = from a in db.Artists
+                        select a;
+            AllArtists = query.ToList();
+
+            Int32 allcount = AllArtists.Count();
+            ViewBag.AllArtistCount = allcount.ToString();
+
+            if (NameSearchString != null && NameSearchString != "")
+            {
+                query = query.Where(a => a.ArtistName.Contains(NameSearchString));
+            }
+
+            decimal Rating;
+            if (RatingString != null && RatingString != "")
+            {
+                try
+                {
+                    Rating = Convert.ToDecimal(RatingString);
+
+                    if (GorL == GreaterOrLess.GreaterThan)
+                    {
+                        query = query.Where(a => a.ArtistRating >= Rating);
+                    }
+                    else if (GorL == GreaterOrLess.LessThan)
+                    {
+                        query = query.Where(a => a.ArtistRating <= Rating);
+                    }
+                }
+
+                catch
+                {
+                    Rating = 0;
+                }
+            }
+
+            List<Artist> ArtistsToAdd = new List<Artist>();
+
+            if (SelectedGenres != null)
+            {
+                foreach (int i in SelectedGenres)
+                {
+                    var query2 = from a in db.Artists
+                                 select a;
+
+                    query2 = query.Where(s => s.ArtistGenres.Any(g => g.GenreId == i));
+                    ArtistsToAdd = query2.OrderBy(a => a.ArtistName).ThenBy(a => a.ArtistRating).ToList();
+
+                    foreach (Artist artist in ArtistsToAdd)
+                    {
+                        SelectedArtists.Add(artist);
+                    }
+                }
+            }
+
+            Int32 viewcount = SelectedArtists.Count();
+            ViewBag.ArtistCount = viewcount.ToString();
+            return View(SelectedArtists);
+        }
 
 
         public SelectList GetAllGenres()
