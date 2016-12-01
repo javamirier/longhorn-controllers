@@ -43,7 +43,6 @@ namespace LonghornMusic.Controllers
 
 
         // POST: Song Search
-
         public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
             ViewBag.AllGenres = GetAllGenres();
@@ -80,7 +79,7 @@ namespace LonghornMusic.Controllers
                     Rating = Convert.ToDecimal(RatingString);
                     if (Rating > 5 || Rating < 1)
                     {
-                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
+                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING IS OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
                     }
                     else
                     {
@@ -92,13 +91,12 @@ namespace LonghornMusic.Controllers
                         {
                             query = query.Where(c => c.SongRating <= Rating);
                         }
-                    }
-                    
+                    }                
                 }
 
                 catch
                 {
-                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING WITH NON NUMERIC CHARACTERS - TRY AGAIN";
+                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING HAS NON-NUMERIC CHARACTERS - TRY AGAIN";
                     Rating = 0;
                 }
             }
@@ -106,8 +104,7 @@ namespace LonghornMusic.Controllers
             List<Song> SongsToAdd = new List<Song>();
 
             if (SelectedGenres != null)
-            {
-                
+            {               
                 foreach (int i in SelectedGenres)
                 {
                     var query2 = from s in db.Songs
@@ -124,8 +121,7 @@ namespace LonghornMusic.Controllers
             }
             else
             {
-                SelectedSongs = query.ToList();
-                
+                SelectedSongs = query.ToList();         
             }
 
             Int32 viewcount = SelectedSongs.Count();
@@ -163,35 +159,29 @@ namespace LonghornMusic.Controllers
             if (RatingString != null && RatingString != "")
             {
                 try
-
                 {
-                    string ErrorMsg = "";
-                    ViewBag.ErrorMsg = ErrorMsg;
                     Rating = Convert.ToDecimal(RatingString);
-
-                    if (Rating <= 5 && Rating >= 1)
+                    if (Rating > 5 || Rating < 1)
+                    {
+                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING IS OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
+                        //RIP not happening// ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + myStringVariable + "');", true);
+                    }
+                    else
                     {
                         if (GorL == GreaterOrLess.GreaterThan)
                         {
-                            query = query.Where(a => a.AlbumRating >= Rating);
+                            query = query.Where(s => s.AlbumRating >= Rating);
                         }
                         else if (GorL == GreaterOrLess.LessThan)
                         {
-                            query = query.Where(a => a.AlbumRating <= Rating);
+                            query = query.Where(c => c.AlbumRating <= Rating);
                         }
                     }
-
-                    else
-                    {
-                        //RIP not happening// ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + myStringVariable + "');", true);
-                        
-                        
-                    }
-                    
                 }
 
                 catch
                 {
+                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING HAS NON-NUMERIC CHARACTERS - TRY AGAIN";
                     Rating = 0;
                 }
             }
@@ -215,6 +205,11 @@ namespace LonghornMusic.Controllers
                 }
             }
 
+            else
+            {
+                SelectedAlbums = query.ToList();
+            }
+
             Int32 viewcount = SelectedAlbums.Count();
             ViewBag.AlbumCount = viewcount.ToString();
             return View(SelectedAlbums);
@@ -223,7 +218,7 @@ namespace LonghornMusic.Controllers
 
 
         // POST: Artist Search
-        public ActionResult ArtistSearch(string NameSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
+        public ActionResult ArtistsSearch(string NameSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
             ViewBag.AllGenres = GetAllGenres();
             List<Artist> SelectedArtists = new List<Artist>();
@@ -247,19 +242,27 @@ namespace LonghornMusic.Controllers
                 try
                 {
                     Rating = Convert.ToDecimal(RatingString);
-
-                    if (GorL == GreaterOrLess.GreaterThan)
+                    if (Rating > 5 || Rating < 1)
                     {
-                        query = query.Where(a => a.ArtistRating >= Rating);
+                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING IS OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
+                        //RIP not happening// ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + myStringVariable + "');", true);
                     }
-                    else if (GorL == GreaterOrLess.LessThan)
+                    else
                     {
-                        query = query.Where(a => a.ArtistRating <= Rating);
+                        if (GorL == GreaterOrLess.GreaterThan)
+                        {
+                            query = query.Where(s => s.ArtistRating >= Rating);
+                        }
+                        else if (GorL == GreaterOrLess.LessThan)
+                        {
+                            query = query.Where(c => c.ArtistRating <= Rating);
+                        }
                     }
                 }
 
                 catch
                 {
+                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING HAS NON-NUMERIC CHARACTERS - TRY AGAIN";
                     Rating = 0;
                 }
             }
@@ -281,6 +284,11 @@ namespace LonghornMusic.Controllers
                         SelectedArtists.Add(artist);
                     }
                 }
+            }
+
+            else
+            {
+                SelectedArtists = query.ToList();
             }
 
             Int32 viewcount = SelectedArtists.Count();
