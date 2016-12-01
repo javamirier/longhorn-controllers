@@ -12,13 +12,16 @@ namespace LonghornMusic.Controllers
     {
         private AppDbContext db = new AppDbContext();
 
+        public enum GreaterOrLess { GreaterThan, LessThan };
+
+
         public ActionResult Index()
         {
             return View();
         }
 
         // GET: Search
-        public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres)
+        public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
         {
             List<Song> SelectedSongs = new List<Song>();
             List<Song> AllSongs = new List<Song>();
@@ -45,18 +48,47 @@ namespace LonghornMusic.Controllers
                 query = query.Where(s => s.SongAlbums.Any(a => a.AlbumName.Contains(AlbumSearchString)));
             }
 
-            var query2 = from s in db.Songs
-                         select s;
+            decimal Rating;
+            if(RatingString != null && RatingString != "")
+            {
+                try
+                {
+                    Rating = Convert.ToDecimal(RatingString);
+
+                    if (GorL == GreaterOrLess.GreaterThan)
+                    {
+                        query = query.Where(s => s.SongRating >= Rating);
+                    }
+                    else if (GorL == GreaterOrLess.LessThan)
+                    {
+                        query = query.Where(c => c.SongRating <= Rating);
+                    }
+                }
+
+                catch
+                {
+                    Rating = 0;
+                }
+            }
+
+            List<Song> SongsToAdd = new List<Song>();
+
             if (SelectedGenres != null)
             {
                 foreach (int i in SelectedGenres)
                 {
-                    query2 = query2.Where(s => s.SongGenres.Any(g => g.GenreId == i));
-                    //TO DO - add query2 to query?
+                    var query2 = from s in db.Songs
+                                 select s;
+
+                    query2 = query.Where(s => s.SongGenres.Any(g => g.GenreId == i));
+                    SongsToAdd = query2.ToList();
+                    
+                    foreach(Song song in SongsToAdd)
+                    {
+                        SelectedSongs.Add(song);
+                    }
                 }
-
             }
-
 
             SelectedSongs = query.OrderBy(c => c.SongName).ThenBy(c => c.SongPrice).ToList();
             Int32 viewcount = SelectedSongs.Count();
