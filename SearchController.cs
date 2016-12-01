@@ -20,31 +20,33 @@ namespace LonghornMusic.Controllers
         }
 
 
-        // GET: Song Search
-        public ActionResult SongsSearch()
-        {
-            ViewBag.AllGenres = GetAllGenres();
-            return View();
-        }
+        //GET: Song Search
+        //public ActionResult SongsSearch()
+        //{
+        //   ViewBag.AllGenres = GetAllGenres();
+        //    return View();
+        //}
 
         // GET: Album Search
-        public ActionResult AlbumsSearch()
-        {
-            ViewBag.AllGenres = GetAllGenres();
-            return View();
-        }
+        //public ActionResult AlbumsSearch()
+        //{
+        //    ViewBag.AllGenres = GetAllGenres();
+        //    return View();
+        //}
 
         // GET: Artist Search
-        public ActionResult ArtistsSearch()
-        {
-            ViewBag.AllGenres = GetAllGenres();
-            return View();
-        }
+        //public ActionResult ArtistsSearch()
+        //{
+        //    ViewBag.AllGenres = GetAllGenres();
+        //    return View();
+        //}
 
 
         // POST: Song Search
-        public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
+
+        public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
+            ViewBag.AllGenres = GetAllGenres();
             List<Song> SelectedSongs = new List<Song>();
             List<Song> AllSongs = new List<Song>();
 
@@ -76,19 +78,27 @@ namespace LonghornMusic.Controllers
                 try
                 {
                     Rating = Convert.ToDecimal(RatingString);
-
-                    if (GorL == GreaterOrLess.GreaterThan)
+                    if (Rating > 5 || Rating < 1)
                     {
-                        query = query.Where(s => s.SongRating >= Rating);
+                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
                     }
-                    else if (GorL == GreaterOrLess.LessThan)
+                    else
                     {
-                        query = query.Where(c => c.SongRating <= Rating);
+                        if (GorL == GreaterOrLess.GreaterThan)
+                        {
+                            query = query.Where(s => s.SongRating >= Rating);
+                        }
+                        else if (GorL == GreaterOrLess.LessThan)
+                        {
+                            query = query.Where(c => c.SongRating <= Rating);
+                        }
                     }
+                    
                 }
 
                 catch
                 {
+                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING WITH NON NUMERIC CHARACTERS - TRY AGAIN";
                     Rating = 0;
                 }
             }
@@ -97,6 +107,7 @@ namespace LonghornMusic.Controllers
 
             if (SelectedGenres != null)
             {
+                
                 foreach (int i in SelectedGenres)
                 {
                     var query2 = from s in db.Songs
@@ -111,6 +122,11 @@ namespace LonghornMusic.Controllers
                     }
                 }
             }
+            else
+            {
+                SelectedSongs = query.ToList();
+                
+            }
 
             Int32 viewcount = SelectedSongs.Count();
             ViewBag.SongCount = viewcount.ToString();
@@ -120,8 +136,9 @@ namespace LonghornMusic.Controllers
 
 
         // POST: Album Search
-        public ActionResult AlbumsSearch(string NameSearchString, string ArtistSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
+        public ActionResult AlbumsSearch(string NameSearchString, string ArtistSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
+            ViewBag.AllGenres = GetAllGenres();
             List<Album> SelectedAlbums = new List<Album>();
             List<Album> AllAlbums = new List<Album>();
 
@@ -146,17 +163,31 @@ namespace LonghornMusic.Controllers
             if (RatingString != null && RatingString != "")
             {
                 try
+
                 {
+                    string ErrorMsg = "";
+                    ViewBag.ErrorMsg = ErrorMsg;
                     Rating = Convert.ToDecimal(RatingString);
 
-                    if (GorL == GreaterOrLess.GreaterThan)
+                    if (Rating <= 5 && Rating >= 1)
                     {
-                        query = query.Where(a => a.AlbumRating >= Rating);
+                        if (GorL == GreaterOrLess.GreaterThan)
+                        {
+                            query = query.Where(a => a.AlbumRating >= Rating);
+                        }
+                        else if (GorL == GreaterOrLess.LessThan)
+                        {
+                            query = query.Where(a => a.AlbumRating <= Rating);
+                        }
                     }
-                    else if (GorL == GreaterOrLess.LessThan)
+
+                    else
                     {
-                        query = query.Where(a => a.AlbumRating <= Rating);
+                        //RIP not happening// ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + myStringVariable + "');", true);
+                        
+                        
                     }
+                    
                 }
 
                 catch
@@ -194,6 +225,7 @@ namespace LonghornMusic.Controllers
         // POST: Artist Search
         public ActionResult ArtistSearch(string NameSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
         {
+            ViewBag.AllGenres = GetAllGenres();
             List<Artist> SelectedArtists = new List<Artist>();
             List<Artist> AllArtists = new List<Artist>();
 
