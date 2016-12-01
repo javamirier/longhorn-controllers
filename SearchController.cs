@@ -20,7 +20,8 @@ namespace LonghornMusic.Controllers
             return View();
         }
 
-        // GET: Search
+
+        // GET: Song Search
         public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
         {
             List<Song> SelectedSongs = new List<Song>();
@@ -81,7 +82,7 @@ namespace LonghornMusic.Controllers
                                  select s;
 
                     query2 = query.Where(s => s.SongGenres.Any(g => g.GenreId == i));
-                    SongsToAdd = query2.ToList();
+                    SongsToAdd = query2.OrderBy(c => c.SongName).ThenBy(c => c.SongPrice).ThenBy(c => c.SongRating).ToList();
                     
                     foreach(Song song in SongsToAdd)
                     {
@@ -90,19 +91,81 @@ namespace LonghornMusic.Controllers
                 }
             }
 
-            SelectedSongs = query.OrderBy(c => c.SongName).ThenBy(c => c.SongPrice).ToList();
             Int32 viewcount = SelectedSongs.Count();
             ViewBag.SongCount = viewcount.ToString();
             return View(SelectedSongs);
-
         }
 
 
-        public ActionResult AlbumsSearch(string SearchString)
+        // GET: Album Search
+        public ActionResult AlbumsSearch(string NameSearchString, string ArtistSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess GorL)
         {
+            List<Album> SelectedAlbums = new List<Album>();
+            List<Album> AllAlbums = new List<Album>();
 
+            var query = from a in db.Albums
+                        select a;
+            AllAlbums = query.ToList();
+
+            Int32 allcount = AllAlbums.Count();
+            ViewBag.AllAlbumCount = allcount.ToString();
+
+            if (NameSearchString != null && NameSearchString != "")
+            {
+                query = query.Where(a => a.AlbumName.Contains(NameSearchString));
+            }
+
+            if (ArtistSearchString != null && ArtistSearchString != "")
+            {
+                query = query.Where(a => a.AlbumArtists.Any(x => x.ArtistName.Contains(ArtistSearchString)));
+            }
+
+            decimal Rating;
+            if (RatingString != null && RatingString != "")
+            {
+                try
+                {
+                    Rating = Convert.ToDecimal(RatingString);
+
+                    if (GorL == GreaterOrLess.GreaterThan)
+                    {
+                        query = query.Where(a => a.AlbumRating >= Rating);
+                    }
+                    else if (GorL == GreaterOrLess.LessThan)
+                    {
+                        query = query.Where(a => a.AlbumRating <= Rating);
+                    }
+                }
+
+                catch
+                {
+                    Rating = 0;
+                }
+            }
+
+            List<Album> AlbumsToAdd = new List<Album>();
+
+            if (SelectedGenres != null)
+            {
+                foreach (int i in SelectedGenres)
+                {
+                    var query2 = from a in db.Albums
+                                 select a;
+
+                    query2 = query.Where(s => s.AlbumGenres.Any(g => g.GenreId == i));
+                    AlbumsToAdd = query2.OrderBy(a => a.AlbumName).ThenBy(a => a.AlbumPrice).ThenBy(a => a.AlbumRating).ToList();
+
+                    foreach (Album album in AlbumsToAdd)
+                    {
+                        SelectedAlbums.Add(album);
+                    }
+                }
+            }
+
+            Int32 viewcount = SelectedAlbums.Count();
+            ViewBag.AlbumCount = viewcount.ToString();
+            return View(SelectedAlbums);
         }
-
 
 
 
