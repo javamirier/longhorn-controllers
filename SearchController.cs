@@ -167,8 +167,12 @@ namespace LonghornMusic.Controllers
                 {
                     string ErrorMsg = "";
                     ViewBag.ErrorMsg = ErrorMsg;
+                    
                     Rating = Convert.ToDecimal(RatingString);
-
+                    if (Rating > 5 || Rating < 1)
+                    {
+                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
+                    }
                     if (Rating <= 5 && Rating >= 1)
                     {
                         if (GorL == GreaterOrLess.GreaterThan)
@@ -180,19 +184,14 @@ namespace LonghornMusic.Controllers
                             query = query.Where(a => a.AlbumRating <= Rating);
                         }
                     }
-
-                    else
-                    {
-                        //RIP not happening// ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + myStringVariable + "');", true);
-                        
-                        
-                    }
+                    
                     
                 }
 
                 catch
                 {
                     Rating = 0;
+                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING WITH NON NUMERIC CHARACTERS - TRY AGAIN";
                 }
             }
 
@@ -288,6 +287,7 @@ namespace LonghornMusic.Controllers
             return View(SelectedArtists);
         }
 
+        //List<Album> AllAlbums
 
         public SelectList GetAllGenres()
         {
