@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 using LonghornMusic.Models;
 
 namespace LonghornMusic.Controllers
@@ -41,6 +42,64 @@ namespace LonghornMusic.Controllers
 
             MultiSelectList allGenresList = new MultiSelectList(allGenres, "GenreId", "GenreName", SelectedGenres);
             return allGenresList;
+        }
+        public SelectList GetAllAlbums()
+        {
+            var query = from a in db.Albums
+                        orderby a.AlbumName
+                        select a;
+
+            List<Album> allAlbums = query.ToList();
+            SelectList allAlbumsList = new SelectList(allAlbums, "AlbumId", "AlbumName");
+            return allAlbumsList;
+        }
+
+        public MultiSelectList GetAllAlbums(Artist artist)
+        {
+            var query = from a in db.Albums
+                        orderby a.AlbumName
+                        select a;
+
+            List<Album> allAlbums = query.ToList();
+            List<Album> SelectedAlbums = new List<Album>();
+
+            foreach (Album a in artist.ArtistAlbums)
+            {
+                //used to be SelectedMembers.Add(m.Id);
+                SelectedAlbums.Add(a);
+            }
+
+            MultiSelectList allAlbumsList = new MultiSelectList(allAlbums, "AlbumId", "AlbumName", SelectedAlbums);
+            return allAlbumsList;
+        }
+        public SelectList GetAllSongs()
+        {
+            var query = from s in db.Songs
+                        orderby s.SongName
+                        select s;
+
+            List<Song> allSongs = query.ToList();
+            SelectList allSongsList = new SelectList(allSongs, "SongId", "SongName");
+            return allSongsList;
+        }
+
+        public MultiSelectList GetAllSongs(Artist artist)
+        {
+            var query = from s in db.Songs
+                        orderby s.SongName
+                        select s;
+
+            List<Song> allSongs = query.ToList();
+            List<Song> SelectedSongs = new List<Song>();
+
+            foreach (Song s in artist.ArtistSongs)
+            {
+                //used to be SelectedMembers.Add(m.Id);
+                SelectedSongs.Add(s);
+            }
+
+            MultiSelectList allSongsList = new MultiSelectList(allSongs, "SongId", "SongName", SelectedSongs);
+            return allSongsList;
         }
 
         private AppDbContext db = new AppDbContext();
@@ -112,6 +171,9 @@ namespace LonghornMusic.Controllers
                 return HttpNotFound();
             }
             AverageRating(artist);
+            ViewBag.SelectedAlbums = GetAllAlbums(artist);
+            ViewBag.SelectedSongs = GetAllSongs(artist);
+            ViewBag.SelectedGenres = GetAllGenres(artist);
             return View(artist);
         }
 
@@ -120,15 +182,48 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ArtistId,ArtistName,ArtistRating")] Artist artist)
+        public ActionResult Edit([Bind(Include = "ArtistId,ArtistName")] Artist artist, Int32[] SelectedGenres, Int32[] SelectedAlbums, Int32[] SelectedSongs)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(artist).State = EntityState.Modified;
+                Artist artistToChange = db.Artists.Find(artist.ArtistId);
+                if (SelectedGenres != null && SelectedGenres.Count() > 0)
+                {
+                    foreach (Int32 Id in SelectedGenres)
+                    {
+                        artistToChange.ArtistGenres.Clear();
+                        Genre genreToAdd = db.Genres.Find(Id);
+                        artistToChange.ArtistGenres.Add(genreToAdd);
+                    }
+                }
+                if (SelectedSongs != null && SelectedSongs.Count() > 0)
+                {
+                    foreach (Int32 Id in SelectedSongs)
+                    {
+                        artistToChange.ArtistSongs.Clear();
+                        Song songToAdd = db.Songs.Find(Id);
+                        artistToChange.ArtistSongs.Add(songToAdd);
+                    }
+                }
+                if (SelectedAlbums != null && SelectedAlbums.Count() > 0)
+                {
+                    foreach (Int32 Id in SelectedAlbums)
+                    {
+                        artistToChange.ArtistAlbums.Clear();
+                        Album albumToAdd = db.Albums.Find(Id);
+                        artistToChange.ArtistAlbums.Add(albumToAdd);
+                    }
+                }
+                artistToChange.ArtistName = artist.ArtistName;
+
+                db.Entry(artistToChange).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
             AverageRating(artist);
+            ViewBag.SelectedAlbums = GetAllAlbums(artist);
+            ViewBag.SelectedSongs = GetAllSongs(artist);
+            ViewBag.SelectedGenres = GetAllGenres(artist);
             return View(artist);
         }
 

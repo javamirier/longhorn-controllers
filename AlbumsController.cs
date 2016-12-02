@@ -111,27 +111,27 @@ namespace LonghornMusic.Controllers
             if (ModelState.IsValid)
             {
                 Album albumToChange = db.Albums.Find(album.AlbumId);
-                albumToChange.AlbumArtists.Clear();
-                albumToChange.AlbumGenres.Clear();
-                albumToChange.AlbumSongs.Clear();
-                if (SelectedArtists != null)
+                if (SelectedArtists != null && SelectedArtists.Count() > 0)
                 {
+                    albumToChange.AlbumArtists.Clear();
                     foreach (Int32 Id in SelectedArtists)
                     {
                         Artist artistToAdd = db.Artists.Find(Id);
                         albumToChange.AlbumArtists.Add(artistToAdd);
                     }
                 }
-                if (SelectedGenres != null)
+                if (SelectedGenres != null && SelectedGenres.Count() > 0)
                 {
+                    albumToChange.AlbumGenres.Clear();
                     foreach (Int32 Id in SelectedGenres)
                     {
                         Genre genreToAdd = db.Genres.Find(Id);
                         albumToChange.AlbumGenres.Add(genreToAdd);
                     }
                 }
-                if (SelectedSongs != null)
+                if (SelectedSongs != null && SelectedSongs.Count() > 0)
                 {
+                    albumToChange.AlbumSongs.Clear();
                     foreach (Int32 Id in SelectedSongs)
                     {
                         Song songToAdd = db.Songs.Find(Id);

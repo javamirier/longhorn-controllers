@@ -5,12 +5,17 @@ using Microsoft.Owin.Security;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace LonghornMusic.Controllers
 {
     [Authorize]
     public class AccountController : Controller
     {
+        private AppDbContext db = new AppDbContext();
         public enum ManageMessageId
         {
             AddPhoneSuccess,
@@ -99,7 +104,101 @@ namespace LonghornMusic.Controllers
             }
         }  
 
-        //
+        //GET: Send to UserMenu
+        [Authorize]
+        public ActionResult UserMenu()
+        {
+            return View();
+        }
+
+
+        //GET: Manage Credit Cards
+        [Authorize]
+        public ActionResult CreditCardsGet()
+        {
+            return View("CreditCards");
+        }
+        //POST: Manage Credit Cards
+        [Authorize]
+        public ActionResult CreditCards(CreditCardsViewModel model)
+        {
+            //Change to use two string properties for credit card instead of a list 
+            string id = User.Identity.GetUserId();
+            AppUser user = db.Users.Find(id);
+            string toAdd = model.CardNumber;
+            if (user.CreditCard1 == null || user.CreditCard1 == "")
+            {
+                user.CreditCard1 = toAdd;
+            }
+            else if (user.CreditCard2 == null || user.CreditCard2 == "")
+            {
+                user.CreditCard2 = toAdd;
+            }
+            else
+            {
+                return RedirectToAction("UserMenu");
+            }
+            //Maybe it's on strike until it gets cost of living adjustments 
+            //string nonsense = user.Id;
+            db.Entry(user).State = EntityState.Modified;
+            db.SaveChanges();
+            //string bullshit = "Changes saved";
+            return RedirectToAction("UserMenu");
+        }
+
+        //GET: Manage Credit Cards
+        [Authorize]
+        public ActionResult ChangeInformationGet()
+        {
+            return View("ChangeInformation");
+        }
+
+        //POST: Change Account Information
+        //i believe
+        [Authorize]
+        public ActionResult ChangeInformation(ChangeInformationViewModel model)
+        {
+            string id = User.Identity.GetUserId();
+            AppUser user = db.Users.Find(id);
+            
+            if (model.Email != null && model.Email != "")
+            {
+                user.Email = model.Email;
+            }
+            if (model.FName != null && model.FName != "")
+            {
+                user.FName = model.FName;
+            }
+            if (model.LName != null && model.LName != "")
+            {
+                user.LName = model.LName;
+            }
+            if (model.PhoneNumber != null && model.PhoneNumber != "")
+            {
+                user.PhoneNumber = model.PhoneNumber;
+            }
+            if (model.Address != null && model.Address != "")
+            {
+                user.Address = model.Address;
+            }
+            if (model.City != null && model.City != "")
+            {
+                user.City = model.City;
+            }
+            if (model.State != null && model.State != "")
+            {
+                user.State = model.State;
+            }
+            if (model.Zip != null && model.Zip != "")
+            {
+                user.Zip = model.Zip;
+            }
+            db.Entry(user).State = EntityState.Modified;
+            db.SaveChanges();
+            return RedirectToAction("UserMenu");
+        }
+
+
         // GET: /Account/Register
         [AllowAnonymous]
         public ActionResult Register()
@@ -118,7 +217,7 @@ namespace LonghornMusic.Controllers
             {
                 //TODO: Add fields to user here so they will be saved to the database
                 //Create a new user with all the properties you need for the class
-                var user = new AppUser { UserName = model.Email, Email = model.Email };
+                var user = new AppUser { UserName = model.Email, Email = model.Email, FName = model.FName, LName = model.LName, PhoneNumber = model.PhoneNumber, Address = model.Address, City = model.City, State = model.State, Zip = model.Zip };
 
                 //Add the new user to the database
                 var result = await UserManager.CreateAsync(user, model.Password);
@@ -264,5 +363,6 @@ namespace LonghornMusic.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
+        
     }
 }
