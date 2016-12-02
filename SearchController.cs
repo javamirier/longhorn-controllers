@@ -12,7 +12,9 @@ namespace LonghornMusic.Controllers
 
     public class SearchController : Controller
     {
+
         private AppDbContext db = new AppDbContext();
+
 
         public ActionResult Index()
         {
@@ -20,30 +22,8 @@ namespace LonghornMusic.Controllers
         }
 
 
-        //GET: Song Search
-        //public ActionResult SongsSearch()
-        //{
-        //   ViewBag.AllGenres = GetAllGenres();
-        //    return View();
-        //}
-
-        // GET: Album Search
-        //public ActionResult AlbumsSearch()
-        //{
-        //    ViewBag.AllGenres = GetAllGenres();
-        //    return View();
-        //}
-
-        // GET: Artist Search
-        //public ActionResult ArtistsSearch()
-        //{
-        //    ViewBag.AllGenres = GetAllGenres();
-        //    return View();
-        //}
-
 
         // POST: Song Search
-
         public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
             ViewBag.AllGenres = GetAllGenres();
@@ -61,27 +41,28 @@ namespace LonghornMusic.Controllers
             {
                 query = query.Where(s => s.SongName.Contains(NameSearchString));
             }
-            
+
             if (ArtistSearchString != null && ArtistSearchString != "")
             {
                 query = query.Where(s => s.SongArtists.Any(a => a.ArtistName.Contains(ArtistSearchString)));
             }
-            
+
             if (AlbumSearchString != null && AlbumSearchString != "")
             {
                 query = query.Where(s => s.SongAlbums.Any(a => a.AlbumName.Contains(AlbumSearchString)));
             }
 
             decimal Rating;
-            if(RatingString != null && RatingString != "")
+            if (RatingString != null && RatingString != "")
             {
                 try
                 {
                     Rating = Convert.ToDecimal(RatingString);
                     if (Rating > 5 || Rating < 1)
                     {
-                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
+                        ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING IS OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
                     }
+
                     else
                     {
                         if (GorL == GreaterOrLess.GreaterThan)
@@ -93,12 +74,11 @@ namespace LonghornMusic.Controllers
                             query = query.Where(c => c.SongRating <= Rating);
                         }
                     }
-                    
                 }
 
                 catch
                 {
-                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "//THERE IS A RATING WITH NON NUMERIC CHARACTERS - TRY AGAIN";
+                    ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING HAS NON-NUMERIC CHARACTERS - TRY AGAIN";
                     Rating = 0;
                 }
             }
@@ -107,49 +87,30 @@ namespace LonghornMusic.Controllers
 
             if (SelectedGenres != null)
             {
-                
                 foreach (int i in SelectedGenres)
                 {
-                    var query2 = from s in db.Songs
-                                 select s;
-
+                    var query2 = from s in db.Songs select s;
                     query2 = query.Where(s => s.SongGenres.Any(g => g.GenreId == i));
                     SongsToAdd = query2.OrderBy(c => c.SongName).ThenBy(c => c.SongPrice).ThenBy(c => c.SongRating).ToList();
-                    
-                    foreach(Song song in SongsToAdd)
-                    {
-                        if (SelectedSongs.Contains(song))
-                        {
 
-                        }
-                        else
+                    foreach (Song song in SongsToAdd)
+                    {
+                        if (!SelectedSongs.Contains(song))
                         {
                             SelectedSongs.Add(song);
                         }
-                        
                     }
                 }
             }
+
             else
             {
                 SelectedSongs = query.ToList();
-                
             }
 
             Int32 viewcount = SelectedSongs.Count();
             ViewBag.SongCount = viewcount.ToString();
             return View(SelectedSongs);
-        }
-
-        public SelectList GetAllAlbums()
-        {
-            var query = from a in db.Albums
-                        orderby a.AlbumName
-                        select a;
-
-            List<Album> allAlbums = query.ToList();
-            SelectList allAlbumsList = new SelectList(allAlbums, "AlbumId", "AlbumName");
-            return allAlbumsList;
         }
 
 
@@ -187,8 +148,8 @@ namespace LonghornMusic.Controllers
                     if (Rating > 5 || Rating < 1)
                     {
                         ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING IS OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
-                        //RIP not happening// ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + myStringVariable + "');", true);
                     }
+
                     else
                     {
                         if (GorL == GreaterOrLess.GreaterThan)
@@ -215,19 +176,13 @@ namespace LonghornMusic.Controllers
             {
                 foreach (int i in SelectedGenres)
                 {
-                    var query2 = from a in db.Albums
-                                 select a;
-
+                    var query2 = from a in db.Albums select a;
                     query2 = query.Where(s => s.AlbumGenres.Any(g => g.GenreId == i));
                     AlbumsToAdd = query2.OrderBy(a => a.AlbumName).ThenBy(a => a.AlbumPrice).ThenBy(a => a.AlbumRating).ToList();
 
                     foreach (Album album in AlbumsToAdd)
                     {
-                        if (SelectedAlbums.Contains(album))
-                        {
-
-                        }
-                        else
+                        if(!SelectedAlbums.Contains(album))
                         {
                             SelectedAlbums.Add(album);
                         }
@@ -275,8 +230,8 @@ namespace LonghornMusic.Controllers
                     if (Rating > 5 || Rating < 1)
                     {
                         ViewBag.ErrorMsg = ViewBag.ErrorMsg + "RATING IS OUT OF BOUND - IT HAS NOT BEEN USED TO REFINE THIS SEARCH";
-                        //RIP not happening// ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + myStringVariable + "');", true);
                     }
+
                     else
                     {
                         if (GorL == GreaterOrLess.GreaterThan)
@@ -303,23 +258,16 @@ namespace LonghornMusic.Controllers
             {
                 foreach (int i in SelectedGenres)
                 {
-                    var query2 = from a in db.Artists
-                                 select a;
-
+                    var query2 = from a in db.Artists select a;
                     query2 = query.Where(s => s.ArtistGenres.Any(g => g.GenreId == i));
                     ArtistsToAdd = query2.OrderBy(a => a.ArtistName).ThenBy(a => a.ArtistRating).ToList();
 
                     foreach (Artist artist in ArtistsToAdd)
                     {
-                        if (SelectedArtists.Contains(artist))
-                        {
-
-                        }
-                        else
+                        if (!SelectedArtists.Contains(artist))
                         {
                             SelectedArtists.Add(artist);
                         }
-                        
                     }
                 }
             }
@@ -334,10 +282,6 @@ namespace LonghornMusic.Controllers
             return View(SelectedArtists);
         }
 
-
-
-
-        //List<Album> AllAlbums
 
         public SelectList GetAllGenres()
         {
