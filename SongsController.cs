@@ -331,7 +331,11 @@ namespace LonghornMusic.Controllers
                 ItemDetail.Purchase = purchase;
                 purchase.ItemDetails.Add(ItemDetail);
                 PurchaseUserDetail.Purchase = purchase;
+<<<<<<< HEAD
                 purchase.PurchaseUserDetail.Add(PurchaseUserDetail);
+=======
+                purchase.PurchaseUserDetail = PurchaseUserDetail;                
+>>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
             }
             else
             {
@@ -350,7 +354,11 @@ namespace LonghornMusic.Controllers
                     ItemDetail.Purchase = Purchase;
                     Purchase.ItemDetails.Add(ItemDetail);
                     PurchaseUserDetailToAdd.Purchase = Purchase;
+<<<<<<< HEAD
                     Purchase.PurchaseUserDetail.Add(PurchaseUserDetailToAdd);
+=======
+                    Purchase.PurchaseUserDetail = PurchaseUserDetailToAdd;
+>>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
                     db.Purchases.Add(Purchase);
                     db.PurchaseUserDetails.Add(PurchaseUserDetailToAdd);
 
