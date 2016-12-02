@@ -152,7 +152,7 @@ namespace LonghornMusic.Controllers
                 detail.Purchase = p;
                 p.ItemDetails.Add(detail);
                 PurchaseUserDetail.Purchase = p;
-                p.PurchaseUserDetail.Add(PurchaseUserDetail);
+                p.PurchaseUserDetail = PurchaseUserDetail;
             }
             else
             {
@@ -174,16 +174,16 @@ namespace LonghornMusic.Controllers
                     detail.Purchase = p;
                     p.ItemDetails.Add(detail);
                     PurchaseUserDetailToAdd.Purchase = p;
-                    p.PurchaseUserDetail.Add(PurchaseUserDetailToAdd);
-                    db.Purchases.Add(p);
+                    p.PurchaseUserDetail = PurchaseUserDetailToAdd;
+                    //db.Purchases.Add(p);
                     db.PurchaseUserDetails.Add(PurchaseUserDetailToAdd);
 
                 }
             }
             db.Entry(user).State = EntityState.Modified;
-            db.ItemDetails.Add(detail);
+            //db.ItemDetails.Add(detail);
             db.SaveChanges();
-            return RedirectToAction("Index","Songs");
+            return RedirectToAction("Index", "Songs");
         }
 
         //PURCHASE ALBUM
