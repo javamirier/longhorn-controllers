@@ -133,14 +133,17 @@ namespace LonghornMusic.Controllers
         {
             Song song = db.Songs.Find(SongId);
             AppUser user = db.Users.Find(User.Identity.GetUserId());
-            user.MusicOwned.Add(song);
+            if(user.MusicOwned.Contains(song))
+            {
+                user.MusicOwned.Add(song);
+            }         
 
             db.Entry(user).State = EntityState.Modified;
             db.SaveChanges();
 
             return RedirectToAction("Index", "Songs");
         }
-        
+
 
         //PURCHASE ALBUM
         public ActionResult AddAlbumToCart(int? AlbumId)
@@ -150,7 +153,11 @@ namespace LonghornMusic.Controllers
             foreach (Song song in album.AlbumSongs)
             {
                 Song songToAdd = db.Songs.Find(song.SongId);
-                user.MusicOwned.Add(songToAdd);
+
+                if(!user.MusicOwned.Contains(song))
+                {
+                    user.MusicOwned.Add(songToAdd);
+                }
             }
 
             db.Entry(user).State = EntityState.Modified;
@@ -158,7 +165,7 @@ namespace LonghornMusic.Controllers
 
             return RedirectToAction("Index", "Albums");
         }
-        
+
 
         protected override void Dispose(bool disposing)
         {
@@ -174,15 +181,15 @@ namespace LonghornMusic.Controllers
             var query = from p in db.Promotions
                         orderby p.DiscountedSongs
                         select p;
-   
+
             List<Promotion> allPromotions = query.ToList();
             decimal sub = 0;
 
-            foreach(ItemDetail id in purchase.ItemDetails)
+            foreach (ItemDetail id in purchase.ItemDetails)
             {
-                foreach(Promotion p in allPromotions)
+                foreach (Promotion p in allPromotions)
                 {
-                    if(p.DiscountedSongs.Contains(id.Song))
+                    if (p.DiscountedSongs.Contains(id.Song))
                     {
                         sub += (100 - p.DiscountPercentage) / 100 * id.Song.SongPrice;
                     }
@@ -190,12 +197,12 @@ namespace LonghornMusic.Controllers
                     else
                     {
                         sub += id.Song.SongPrice;
-                    }                    
+                    }
                 }
             }
 
             sub = Math.Round(sub, 2);
-            purchase.Subtotal = sub;         
+            purchase.Subtotal = sub;
         }
 
         public decimal CalculateTax(Purchase purchase)
