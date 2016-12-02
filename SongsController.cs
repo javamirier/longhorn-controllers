@@ -59,7 +59,6 @@ namespace LonghornMusic.Controllers
 
             foreach (Artist a in song.SongArtists)
             {
-                //used to be SelectedMembers.Add(m.Id);
                 SelectedArtists.Add(a);
             }
 
@@ -78,7 +77,6 @@ namespace LonghornMusic.Controllers
 
             foreach (Genre g in song.SongGenres)
             {
-                //used to be SelectedMembers.Add(m.Id);
                 SelectedGenres.Add(g);
             }
 
@@ -97,7 +95,6 @@ namespace LonghornMusic.Controllers
 
             foreach (Album a in song.SongAlbums)
             {
-                //used to be SelectedMembers.Add(m.Id);
                 SelectedAlbums.Add(a);
             }
 
@@ -105,11 +102,10 @@ namespace LonghornMusic.Controllers
             return allAlbumsList;
         }
 
-        public void AverageRating(Song song)
+
+        public void AverageRating(Int32 songID)
         {
-            var query = from r in db.SongReviews
-                        orderby r.ReviewedSong.SongName
-                        select r;
+            Song song = db.Songs.Find(songID);
 
             decimal total_rating = 0;
             decimal avg_rating = 0;
@@ -127,6 +123,8 @@ namespace LonghornMusic.Controllers
             }
            
             song.SongRating = avg_rating;
+            db.Entry(song).State = EntityState.Modified;
+            db.SaveChanges();
         }
 
 
@@ -151,7 +149,7 @@ namespace LonghornMusic.Controllers
                 return HttpNotFound();
             }
 
-            AverageRating(song);
+            AverageRating(song.SongId);
             return View(song);
         }
 
@@ -200,7 +198,7 @@ namespace LonghornMusic.Controllers
                 return RedirectToAction("Index");
             }
 
-            AverageRating(song);
+            AverageRating(song.SongId);
             ViewBag.SelectedArtists = GetAllArtists(song);
             ViewBag.SelectedGenres = GetAllGenres(song);
             ViewBag.AllAlbums = GetAllAlbums(song);
@@ -220,7 +218,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
-            AverageRating(song);
+            AverageRating(song.SongId);
             ViewBag.AllArtists = GetAllArtists(song);
             ViewBag.AllAlbums = GetAllAlbums(song);
             ViewBag.AllGenres = GetAllGenres(song);
@@ -273,7 +271,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            AverageRating(song);
+            AverageRating(song.SongId);
             ViewBag.AllArtists = GetAllArtists(song);
             ViewBag.AllAlbums = GetAllAlbums(song);
             ViewBag.AllGenres = GetAllGenres(song);
@@ -331,11 +329,7 @@ namespace LonghornMusic.Controllers
                 ItemDetail.Purchase = purchase;
                 purchase.ItemDetails.Add(ItemDetail);
                 PurchaseUserDetail.Purchase = purchase;
-<<<<<<< HEAD
-                purchase.PurchaseUserDetail.Add(PurchaseUserDetail);
-=======
-                purchase.PurchaseUserDetail = PurchaseUserDetail;                
->>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
+                purchase.PurchaseUserDetail.Add(PurchaseUserDetail);                
             }
             else
             {
@@ -354,11 +348,7 @@ namespace LonghornMusic.Controllers
                     ItemDetail.Purchase = Purchase;
                     Purchase.ItemDetails.Add(ItemDetail);
                     PurchaseUserDetailToAdd.Purchase = Purchase;
-<<<<<<< HEAD
                     Purchase.PurchaseUserDetail.Add(PurchaseUserDetailToAdd);
-=======
-                    Purchase.PurchaseUserDetail = PurchaseUserDetailToAdd;
->>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
                     db.Purchases.Add(Purchase);
                     db.PurchaseUserDetails.Add(PurchaseUserDetailToAdd);
 

@@ -36,7 +36,6 @@ namespace LonghornMusic.Controllers
 
             foreach (Genre g in artist.ArtistGenres)
             {
-                //used to be SelectedMembers.Add(m.Id);
                 SelectedGenres.Add(g);
             }
 
@@ -122,7 +121,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
-            AverageRating(artist);
+            AverageRating(artist.ArtistId);
             return View(artist);
         }
 
@@ -154,7 +153,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            AverageRating(artist);
+            AverageRating(artist.ArtistId);
             return View(artist);
         }
 
@@ -170,7 +169,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
-            AverageRating(artist);
+            AverageRating(artist.ArtistId);
             ViewBag.SelectedAlbums = GetAllAlbums(artist);
             ViewBag.SelectedSongs = GetAllSongs(artist);
             ViewBag.SelectedGenres = GetAllGenres(artist);
@@ -220,7 +219,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            AverageRating(artist);
+            AverageRating(artist.ArtistId);
             ViewBag.SelectedAlbums = GetAllAlbums(artist);
             ViewBag.SelectedSongs = GetAllSongs(artist);
             ViewBag.SelectedGenres = GetAllGenres(artist);
@@ -262,11 +261,9 @@ namespace LonghornMusic.Controllers
             base.Dispose(disposing);
         }
 
-        public void AverageRating(Artist artist)
+        public void AverageRating(Int32 artistID)
         {
-            var query = from r in db.ArtistReviews
-                        orderby r.ReviewedArtist.ArtistName
-                        select r;
+            Artist artist = db.Artists.Find(artistID);
 
             decimal total_rating = 0;
             decimal avg_rating = 0;

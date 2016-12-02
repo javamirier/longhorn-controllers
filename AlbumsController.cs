@@ -33,6 +33,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
+            AverageRating(album.AlbumId);
             return View(album);
         }
 
@@ -75,7 +76,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            AverageRating(album);
+            AverageRating(album.AlbumId);
             ViewBag.AllArtists = GetAllArtists(album);
             ViewBag.AllGenres = GetAllGenres(album);
             ViewBag.AllSongs = GetAllSongs(album);
@@ -94,7 +95,7 @@ namespace LonghornMusic.Controllers
             {
                 return HttpNotFound();
             }
-            AverageRating(album);
+            AverageRating(album.AlbumId);
             ViewBag.SelectedArtists = GetAllArtists(album);
             ViewBag.SelectedGenres = GetAllGenres(album);
             ViewBag.SelectedSongs = GetAllSongs(album);
@@ -146,7 +147,7 @@ namespace LonghornMusic.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            AverageRating(album);
+            AverageRating(album.AlbumId);
             ViewBag.SelectedArtists = GetAllArtists(album);
             ViewBag.SelectedGenres = GetAllGenres(album);
             ViewBag.SelectedSongs = GetAllSongs(album);
@@ -274,11 +275,9 @@ namespace LonghornMusic.Controllers
             return allGenresList;
         }
 
-        public void AverageRating(Album album)
+        public void AverageRating(Int32 albumID)
         {
-            var query = from r in db.AlbumReviews
-                        orderby r.AlbumToBeReviewed.AlbumName
-                        select r;
+            Album album = db.Albums.Find(albumID);
 
             decimal total_rating = 0;
             decimal avg_rating = 0;
@@ -296,7 +295,8 @@ namespace LonghornMusic.Controllers
             }
 
             album.AlbumRating = avg_rating;
+            db.Entry(album).State = EntityState.Modified;    
+            db.SaveChanges();
         }
-
     }
 }
