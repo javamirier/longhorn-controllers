@@ -15,12 +15,14 @@ namespace LonghornMusic.Controllers
         private AppDbContext db = new AppDbContext();
 
         // GET: Genres
+        [AllowAnonymous]
         public ActionResult Index()
         {
             return View(db.Genres.ToList());
         }
 
         // GET: Genres/Details/5
+        [AllowAnonymous]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -36,6 +38,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Genres/Create
+        [Authorize(Roles = "Manager")]
         public ActionResult Create()
         {
             return View();
@@ -46,6 +49,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public ActionResult Create([Bind(Include = "GenreId,GenreName")] Genre genre)
         {
             if (ModelState.IsValid)
@@ -59,6 +63,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Genres/Edit/5
+        [Authorize(Roles = "Manager")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -78,6 +83,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public ActionResult Edit([Bind(Include = "GenreId,GenreName")] Genre genre)
         {
             if (ModelState.IsValid)
@@ -90,6 +96,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Genres/Delete/5
+        [Authorize(Roles = "Manager")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -107,6 +114,7 @@ namespace LonghornMusic.Controllers
         // POST: Genres/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public ActionResult DeleteConfirmed(int id)
         {
             Genre genre = db.Genres.Find(id);

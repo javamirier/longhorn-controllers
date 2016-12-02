@@ -18,12 +18,14 @@ namespace LonghornMusic.Controllers
         private AppDbContext db = new AppDbContext();
 
         // GET: Purchases
+        [Authorize(Roles = "Customer")]
         public ActionResult Index()
         {
             return View(db.Purchases.ToList());
         }
 
         // GET: Purchases/Details/5
+        [Authorize(Roles = "Customer")]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -39,6 +41,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Purchases/Create
+        [Authorize(Roles = "Customer")]
         public ActionResult Create()
         {
             return View();
@@ -49,6 +52,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult Create([Bind(Include = "PurchaseId,Date,Subtotal,IsComplete")] Purchase purchase)
         {
             if (ModelState.IsValid)
@@ -62,6 +66,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Purchases/Edit/5
+        [Authorize(Roles = "Customer")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -86,6 +91,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult Edit([Bind(Include = "PurchaseId,Date,Subtotal,IsComplete")] Purchase purchase)
         {
             if (ModelState.IsValid)
@@ -103,6 +109,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Purchases/Delete/5
+        [Authorize(Roles = "Customer")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -120,6 +127,7 @@ namespace LonghornMusic.Controllers
         // POST: Purchases/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult DeleteConfirmed(int id)
         {
             Purchase purchase = db.Purchases.Find(id);
@@ -129,6 +137,7 @@ namespace LonghornMusic.Controllers
         }
 
         //PURCHASE SONG
+        [Authorize(Roles = "Customer")]
         public ActionResult AddSongToCart(int SongId)
         {
             Song song = db.Songs.Find(SongId);
@@ -146,6 +155,7 @@ namespace LonghornMusic.Controllers
 
 
         //PURCHASE ALBUM
+        [Authorize(Roles = "Customer")]
         public ActionResult AddAlbumToCart(int? AlbumId)
         {
             Album album = db.Albums.Find(AlbumId);

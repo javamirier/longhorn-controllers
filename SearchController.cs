@@ -15,17 +15,15 @@ namespace LonghornMusic.Controllers
 
         private AppDbContext db = new AppDbContext();
 
-
+        [AllowAnonymous]
         public ActionResult Index()
         {
             return View();
         }
 
 
-        //Show user music 
-
-
         // POST: Song Search
+        [AllowAnonymous]
         public ActionResult SongsSearch(string NameSearchString, string ArtistSearchString, string AlbumSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
             ViewBag.AllGenres = GetAllGenres();
@@ -118,6 +116,7 @@ namespace LonghornMusic.Controllers
 
 
         // POST: Album Search
+        [AllowAnonymous]
         public ActionResult AlbumsSearch(string NameSearchString, string ArtistSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
             ViewBag.AllGenres = GetAllGenres();
@@ -205,6 +204,7 @@ namespace LonghornMusic.Controllers
 
 
         // POST: Artist Search
+        [AllowAnonymous]
         public ActionResult ArtistsSearch(string NameSearchString, int[] SelectedGenres, string RatingString, GreaterOrLess? GorL)
         {
             ViewBag.AllGenres = GetAllGenres();

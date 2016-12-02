@@ -16,12 +16,14 @@ namespace LonghornMusic.Controllers
         private AppDbContext db = new AppDbContext();
 
         // GET: Reviews
+        [Authorize(Roles = "Customer")]
         public ActionResult Index()
         {
             return View(db.Reviews.ToList());
         }
 
 
+        [Authorize(Roles = "Customer")]
         public ActionResult CreateSongReview(Int32 songID)
         {
             AppUser author = db.Users.Find(User.Identity.GetUserId());
@@ -44,6 +46,7 @@ namespace LonghornMusic.Controllers
             return View("AccessDenied");
         }
 
+        [Authorize(Roles = "Customer")]
         public ActionResult CreateAlbumReview(Int32 albumID)
         {
             AppUser author = db.Users.Find(User.Identity.GetUserId());
@@ -74,6 +77,7 @@ namespace LonghornMusic.Controllers
             return View("AccessDenied");
         }
 
+        [Authorize(Roles = "Customer")]
         public ActionResult CreateArtistReview(Int32 artistID)
         {
             AppUser author = db.Users.Find(User.Identity.GetUserId());
@@ -97,6 +101,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult CreateSongReview([Bind(Include = "SongReviewId, SongScore, SongReviewText, SongReviewAuthor")] SongReview review, Int32 songID)
         {
             Song song = db.Songs.Find(songID);
@@ -116,6 +121,7 @@ namespace LonghornMusic.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult CreateAlbumReview([Bind(Include = "AlbumReviewId, AlbumScore, AlbumReviewText, AlbumReviewAuthor")] AlbumReview review, Int32 albumID)
         {
             Album album = db.Albums.Find(albumID);
@@ -135,6 +141,7 @@ namespace LonghornMusic.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult CreateArtistReview([Bind(Include = "ArtistReviewId, ArtistScore, ArtistReviewText, ArtistReviewAuthor")] ArtistReview review, Int32 artistID)
         {
             Artist artist = db.Artists.Find(artistID);
@@ -152,7 +159,7 @@ namespace LonghornMusic.Controllers
             return View(review);
         }
 
-
+        [Authorize(Roles = "Customer")]
         public ActionResult SongReviewDetails(int? id)
         {
             if (id == null)
@@ -167,6 +174,7 @@ namespace LonghornMusic.Controllers
             return View(review);
         }
 
+        [Authorize(Roles = "Customer")]
         public ActionResult AlbumReviewDetails(int? id)
         {
             if (id == null)
@@ -181,6 +189,7 @@ namespace LonghornMusic.Controllers
             return View(review);
         }
 
+        [Authorize(Roles = "Customer")]
         public ActionResult ArtistReviewDetails(int? id)
         {
             if (id == null)
@@ -198,6 +207,7 @@ namespace LonghornMusic.Controllers
 
 
         // GET: Reviews/Edit/5
+        [Authorize(Roles = "Customer")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -217,6 +227,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult Edit([Bind(Include = "ReviewId")] SongReview review)
         {
             if (ModelState.IsValid)
@@ -229,8 +240,8 @@ namespace LonghornMusic.Controllers
         }
 
 
-
         // GET: Reviews/Delete/5
+        [Authorize(Roles = "Customer")]
         public ActionResult SongReviewDelete(int? id)
         {
             if (id == null)
@@ -248,6 +259,7 @@ namespace LonghornMusic.Controllers
         // POST: Reviews/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult SongReviewDeleteConfirmed(int id)
         {
             SongReview review = db.SongReviews.Find(id);
@@ -258,6 +270,7 @@ namespace LonghornMusic.Controllers
 
 
         // GET: Reviews/Delete/5
+        [Authorize(Roles = "Customer")]
         public ActionResult AlbumReviewDelete(int? id)
         {
             if (id == null)
@@ -275,6 +288,7 @@ namespace LonghornMusic.Controllers
         // POST: Reviews/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult AlbumReviewDeleteConfirmed(int id)
         {
             AlbumReview review = db.AlbumReviews.Find(id);
@@ -285,6 +299,7 @@ namespace LonghornMusic.Controllers
 
 
         // GET: Reviews/Delete/5
+        [Authorize(Roles = "Customer")]
         public ActionResult ArtistReviewDelete(int? id)
         {
             if (id == null)
@@ -302,6 +317,7 @@ namespace LonghornMusic.Controllers
         // POST: Reviews/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult ArtistReviewDeleteConfirmed(int id)
         {
             ArtistReview review = db.ArtistReviews.Find(id);

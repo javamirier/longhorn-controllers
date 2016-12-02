@@ -65,7 +65,7 @@ namespace LonghornMusic.Controllers
             }
         }
 
-
+        [Authorize(Roles = "Customer")]
         public ActionResult MusicOwnedGet()
         {
             AppUser Customer = db.Users.Find(User.Identity.GetUserId());
@@ -73,6 +73,7 @@ namespace LonghornMusic.Controllers
             return RedirectToAction("MusicOwned");
         }
 
+        [Authorize(Roles = "Customer")]
         public ActionResult MusicOwned()
         {
             AppUser Customer = db.Users.Find(User.Identity.GetUserId());
@@ -123,7 +124,7 @@ namespace LonghornMusic.Controllers
         }
 
         //Send to UsersList
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public ActionResult UsersList()
         {
             //What the hell is this 
@@ -139,6 +140,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Songs/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -158,6 +160,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult Edit([Bind(Include = "UserId, FName, LName, MI, Email, PhoneNumber, Address, City, State, Zip")] AppUser user, string FName, string LName, string MI, string Email, string PhoneNumber, string Address, string City, string State, string Zip)
         {
             if (ModelState.IsValid)
@@ -189,13 +192,14 @@ namespace LonghornMusic.Controllers
         }
 
         //GET: Manage Credit Cards
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public ActionResult CreditCardsGet()
         {
             return View("CreditCards");
         }
+
         //POST: Manage Credit Cards
-        [Authorize]
+        [Authorize(Roles = "Manager")]
         public ActionResult CreditCards(CreditCardsViewModel model)
         {
             //Change to use two string properties for credit card instead of a list 
@@ -218,7 +222,6 @@ namespace LonghornMusic.Controllers
             //string nonsense = user.Id;
             db.Entry(user).State = EntityState.Modified;
             db.SaveChanges();
-            //string bullshit = "Changes saved";
             return RedirectToAction("UserMenu");
         }
 
@@ -314,17 +317,15 @@ namespace LonghornMusic.Controllers
         {
             if (ModelState.IsValid)
             {
-                //TODO: Add fields to user here so they will be saved to the database
                 //Create a new user with all the properties you need for the class
                 var user = new AppUser { UserName = model.Email, Email = model.Email, FName = model.FName, LName = model.LName, PhoneNumber = model.PhoneNumber, Address = model.Address, City = model.City, State = model.State, Zip = model.Zip };
 
                 //Add the new user to the database
                 var result = await UserManager.CreateAsync(user, model.Password);
 
-                //TODO: Once you get roles working, you may want to add users to roles upon creation
-                //await UserManager.AddToRoleAsync(user.Id, "User"); //adds user to role called "User"
-                // --OR--
-                //await UserManager.AddToRoleAsync(user.Id, "Employee"); //adds user to role called "Employee"
+                // Once you get roles working, you may want to add users to roles upon creation
+                await UserManager.AddToRoleAsync(user.Id, "Customer"); //adds user to role called "User"
+
 
                 if (result.Succeeded) //user was created successfully
                 {
@@ -354,6 +355,7 @@ namespace LonghornMusic.Controllers
 
 
         // GET: /Account/ChangePassword
+        [Authorize]
         public ActionResult ChangePassword()
         {
             return View();
@@ -363,6 +365,7 @@ namespace LonghornMusic.Controllers
         // POST: /Account/ChangePassword
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)

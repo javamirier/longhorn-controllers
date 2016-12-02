@@ -131,12 +131,14 @@ namespace LonghornMusic.Controllers
         private AppDbContext db = new AppDbContext();
 
         // GET: Songs
+        [AllowAnonymous]
         public ActionResult Index()
         {
             return View(db.Songs.ToList());
         }
 
         // GET: Songs/Details/5
+        [AllowAnonymous]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -154,6 +156,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Songs/Create
+        [Authorize(Roles ="Manager")]
         public ActionResult Create()
         {
             ViewBag.SelectedArtists = GetAllArtists();
@@ -167,6 +170,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public ActionResult Create([Bind(Include = "SongId,SongName,SongPrice,SongArtists,SongGenres,SongAlbums")] Song song, Int32[] SelectedArtists, Int32[] SelectedGenres, Int32[] SelectedAlbums, string SongPrice)
         {
             //DONE: Fix method attaching; this only works with 1 album per song, not many 
@@ -207,6 +211,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Songs/Edit/5
+        [Authorize(Roles = "Manager")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -230,6 +235,7 @@ namespace LonghornMusic.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public ActionResult Edit([Bind(Include = "SongId,SongName,SelectedArtists,SongPrice")] Song song, Int32[] SelectedArtists, Int32[] SelectedGenres, Int32[] SelectedAlbums, Decimal SongPrice)
         {
             if (ModelState.IsValid)
@@ -279,6 +285,7 @@ namespace LonghornMusic.Controllers
         }
 
         // GET: Songs/Delete/5
+        [Authorize(Roles = "Manager")]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -296,6 +303,7 @@ namespace LonghornMusic.Controllers
         // POST: Songs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public ActionResult DeleteConfirmed(int id)
         {
             Song song = db.Songs.Find(id);
@@ -308,6 +316,7 @@ namespace LonghornMusic.Controllers
         //PURCHASE A SONG
         [HttpPost, ActionName("AddToCart")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public ActionResult AddToCart(int? Id)
         {
             Song song = db.Songs.Find(Id);

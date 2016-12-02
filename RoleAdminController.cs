@@ -6,29 +6,30 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 
-//TODO: Change the using statement here to match your project's name
 using LonghornMusic.Models;
 
-//TODO: Change the namespace here to match your project's name
 namespace LonghornMusic.Controllers
 {
-    //TODO: Once you have roles working, uncomment the tag below to limit access to this page
-    //[Authorize]
+
+    [Authorize(Roles = "Manager")]
     public class RoleAdminController : Controller
     {
         //
         // GET: /RoleAdmin/
+        [Authorize(Roles = "Manager")]
         public ActionResult Index()
         {
             return View(RoleManager.Roles);
         }
 
+        [Authorize(Roles = "Manager")]
         public ActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Manager")]
         public ActionResult Create([Required] string name)
         {
             if (ModelState.IsValid)
@@ -49,6 +50,7 @@ namespace LonghornMusic.Controllers
             return View(name);
         }
 
+        [Authorize(Roles = "Manager")]
         public ActionResult Edit(string id)
         {
             AppRole role = RoleManager.FindById(id);
@@ -59,6 +61,7 @@ namespace LonghornMusic.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Manager")]
         public ActionResult Edit(RoleModificationModel model)
         {
             IdentityResult result;
@@ -85,7 +88,6 @@ namespace LonghornMusic.Controllers
             }
             return View("Error", new string[] { "Role Not Found" });
         }
-
 
 
 
