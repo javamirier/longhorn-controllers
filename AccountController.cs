@@ -35,7 +35,7 @@ namespace LonghornMusic.Controllers
         {
         }
 
-        public AccountController(AppUserManager userManager, AppSignInManager signInManager )
+        public AccountController(AppUserManager userManager, AppSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -47,9 +47,9 @@ namespace LonghornMusic.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<AppSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -64,6 +64,23 @@ namespace LonghornMusic.Controllers
                 _userManager = value;
             }
         }
+
+
+        public ActionResult MusicOwnedGet()
+        {
+            AppUser Customer = db.Users.Find(User.Identity.GetUserId());
+            List<Song> songList = Customer.MusicOwned;
+            return RedirectToAction("MusicOwned");
+        }
+
+        public ActionResult MusicOwned()
+        {
+            AppUser Customer = db.Users.Find(User.Identity.GetUserId());
+            List<Song> songList = Customer.MusicOwned;
+            return View(songList);
+
+        }
+
 
         //
         // GET: /Account/Login
@@ -103,7 +120,7 @@ namespace LonghornMusic.Controllers
                     ModelState.AddModelError("", "Invalid login attempt.");
                     return View(model);
             }
-        }  
+        }
 
         //Send to UsersList
         [Authorize]
@@ -224,7 +241,7 @@ namespace LonghornMusic.Controllers
             ViewBag.Zip = user.Zip;
             ViewBag.City = user.City;
             ViewBag.State = user.State;
-            
+
             return View("UserDetails");
         }
 
@@ -242,7 +259,7 @@ namespace LonghornMusic.Controllers
         {
             string id = User.Identity.GetUserId();
             AppUser user = db.Users.Find(id);
-            
+
             if (model.Email != null && model.Email != "")
             {
                 user.Email = model.Email;
@@ -312,7 +329,7 @@ namespace LonghornMusic.Controllers
                 if (result.Succeeded) //user was created successfully
                 {
                     //sign the user in
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
                     //send them to the home page
                     return RedirectToAction("Index", "Home");
@@ -420,7 +437,7 @@ namespace LonghornMusic.Controllers
             base.Dispose(disposing);
         }
 
-       
+
         private IAuthenticationManager AuthenticationManager
         {
             get
@@ -445,6 +462,6 @@ namespace LonghornMusic.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-        
+
     }
 }
