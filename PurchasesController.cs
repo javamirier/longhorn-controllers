@@ -132,130 +132,33 @@ namespace LonghornMusic.Controllers
         public ActionResult AddSongToCart(int SongId)
         {
             Song song = db.Songs.Find(SongId);
-            string uid = User.Identity.GetUserId();
-            AppUser user = db.Users.Find(uid);
+            AppUser user = db.Users.Find(User.Identity.GetUserId());
+            user.MusicOwned.Add(song);
 
-            ItemDetail detail = new ItemDetail();
-            decimal PurchasePrice = song.SongPrice;
-            detail.PurchasePrice = PurchasePrice;
-            detail.Song = song;
-
-            if (user.OrderHistory.Count == 0 || user.OrderHistory == null)
-            {
-                PurchaseUserDetail PurchaseUserDetail = new PurchaseUserDetail();
-                PurchaseUserDetail.Customer = user;
-                user.OrderHistory.Add(PurchaseUserDetail);
-
-                Purchase p = new Purchase();
-                p.IsComplete = false;
-                p.Date = DateTime.Today;
-                detail.Purchase = p;
-                p.ItemDetails.Add(detail);
-                PurchaseUserDetail.Purchase = p;
-<<<<<<< HEAD
-                p.PurchaseUserDetail.Add(PurchaseUserDetail);
-=======
-                p.PurchaseUserDetail = PurchaseUserDetail;
->>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
-            }
-            else
-            {
-                PurchaseUserDetail PurchaseUserDetail = user.OrderHistory.Last();
-                if (PurchaseUserDetail.Purchase.IsComplete == false)
-                {
-                    PurchaseUserDetail.Purchase.ItemDetails.Add(detail);
-                    db.Entry(PurchaseUserDetail).State = EntityState.Modified;
-                }
-                else
-                {
-                    PurchaseUserDetail PurchaseUserDetailToAdd = new PurchaseUserDetail();
-                    PurchaseUserDetailToAdd.Customer = user;
-                    user.OrderHistory.Add(PurchaseUserDetailToAdd);
-
-                    Purchase p = new Purchase();
-                    p.IsComplete = false;
-                    p.Date = DateTime.Today;
-                    detail.Purchase = p;
-                    p.ItemDetails.Add(detail);
-                    PurchaseUserDetailToAdd.Purchase = p;
-<<<<<<< HEAD
-                    p.PurchaseUserDetail.Add(PurchaseUserDetailToAdd);
-=======
-                    p.PurchaseUserDetail = PurchaseUserDetailToAdd;
->>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
-                    //db.Purchases.Add(p);
-                    db.PurchaseUserDetails.Add(PurchaseUserDetailToAdd);
-
-                }
-            }
             db.Entry(user).State = EntityState.Modified;
-            //db.ItemDetails.Add(detail);
             db.SaveChanges();
+
             return RedirectToAction("Index", "Songs");
         }
+        
 
         //PURCHASE ALBUM
         public ActionResult AddAlbumToCart(int? AlbumId)
         {
-            Song song = db.Songs.Find(AlbumId);
-            string uid = User.Identity.GetUserId();
-            AppUser user = db.Users.Find(uid);
-
-            ItemDetail ItemDetail = new ItemDetail();
-            decimal PurchasePrice = song.SongPrice;
-            ItemDetail.PurchasePrice = PurchasePrice;
-            ItemDetail.Song = song;
-
-            if (user.OrderHistory.Count == 0 || user.OrderHistory == null)
+            Album album = db.Albums.Find(AlbumId);
+            AppUser user = db.Users.Find(User.Identity.GetUserId());
+            foreach (Song song in album.AlbumSongs)
             {
-                PurchaseUserDetail PurchaseUserDetail = new PurchaseUserDetail();
-                PurchaseUserDetail.Customer = user;
-
-                Purchase purchase = new Purchase();
-                purchase.IsComplete = false;
-                purchase.Date = DateTime.Today;
-                ItemDetail.Purchase = purchase;
-                purchase.ItemDetails.Add(ItemDetail);
-                PurchaseUserDetail.Purchase = purchase;
-<<<<<<< HEAD
-                purchase.PurchaseUserDetail.Add(PurchaseUserDetail);
-=======
-                purchase.PurchaseUserDetail = PurchaseUserDetail;
->>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
+                Song songToAdd = db.Songs.Find(song.SongId);
+                user.MusicOwned.Add(songToAdd);
             }
-            else
-            {
-                PurchaseUserDetail PurchaseUserDetail = user.OrderHistory[user.OrderHistory.Count - 1];
-                if (PurchaseUserDetail.Purchase.IsComplete == false)
-                {
-                    PurchaseUserDetail.Purchase.ItemDetails.Add(ItemDetail);
-                }
-                else
-                {
-                    PurchaseUserDetail PurchaseUserDetailToAdd = new PurchaseUserDetail();
-                    PurchaseUserDetailToAdd.Customer = user;
 
-                    Purchase Purchase = new Purchase();
-                    Purchase.IsComplete = false;
-                    Purchase.Date = DateTime.Today;
-                    ItemDetail.Purchase = Purchase;
-                    Purchase.ItemDetails.Add(ItemDetail);
-                    PurchaseUserDetailToAdd.Purchase = Purchase;
-<<<<<<< HEAD
-                    Purchase.PurchaseUserDetail.Add(PurchaseUserDetailToAdd);
-=======
-                    Purchase.PurchaseUserDetail = PurchaseUserDetailToAdd;
->>>>>>> 08df4d6d7237b842652f2d1e116ef46bdb6a5aca
-                    db.Purchases.Add(Purchase);
-                    db.PurchaseUserDetails.Add(PurchaseUserDetailToAdd);
-
-                }
-            }
-            db.ItemDetails.Add(ItemDetail);
-            //Error here is most likely because of [Required] lines in models for values that should be null for now 
+            db.Entry(user).State = EntityState.Modified;
             db.SaveChanges();
+
             return RedirectToAction("Index", "Albums");
         }
+        
 
         protected override void Dispose(bool disposing)
         {
