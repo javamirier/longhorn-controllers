@@ -9,6 +9,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Collections.Generic;
+using System.Net;
 
 namespace LonghornMusic.Controllers
 {
@@ -104,13 +105,71 @@ namespace LonghornMusic.Controllers
             }
         }  
 
+        //Send to UsersList
+        [Authorize]
+        public ActionResult UsersList()
+        {
+            //What the hell is this 
+            //var usersInRole = db.Users.Where(m => m.Roles.RoleId == role.Id)).ToList();
+
+            List<AppUser> AllUsers = new List<AppUser>();
+
+            var query = from u in db.Users
+                        select u;
+            AllUsers = query.ToList();
+
+            return View(AllUsers);
+        }
+
+        // GET: Songs/Edit/5
+        public ActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            AppUser user = db.Users.Find(id);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+            return View(user);
+        }
+
+        // POST: Songs/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "UserId, FName, LName, MI, Email, PhoneNumber, Address, City, State, Zip")] AppUser user, string FName, string LName, string MI, string Email, string PhoneNumber, string Address, string City, string State, string Zip)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser userToChange = db.Users.Find(user.Id);
+
+                userToChange.FName = user.FName;
+                userToChange.LName = user.LName;
+                userToChange.MI = user.MI;
+                userToChange.Email = user.Email;
+                userToChange.PhoneNumber = user.PhoneNumber;
+                userToChange.City = user.City;
+                userToChange.State = user.State;
+                userToChange.Zip = user.Zip;
+                userToChange.Address = user.Address;
+
+                db.Entry(userToChange).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("UserList");
+            }
+            return View("UserList");
+        }
+
         //GET: Send to UserMenu
         [Authorize]
         public ActionResult UserMenu()
         {
             return View();
         }
-
 
         //GET: Manage Credit Cards
         [Authorize]
