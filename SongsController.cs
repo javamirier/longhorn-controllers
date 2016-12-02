@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 using LonghornMusic.Models;
 
 namespace LonghornMusic.Controllers
@@ -236,28 +237,28 @@ namespace LonghornMusic.Controllers
             if (ModelState.IsValid)
             {
                 Song songToChange = db.Songs.Find(song.SongId);
-                //TODO: Y u no work 
-                songToChange.SongArtists.Clear();
-                songToChange.SongGenres.Clear();
-                songToChange.SongAlbums.Clear();
-                if (SelectedArtists != null)
+                //DONE: Y u no work 
+                if (SelectedArtists != null && SelectedArtists.Count() > 0)
                 {
+                    songToChange.SongArtists.Clear();
                     foreach (Int32 Id in SelectedArtists)
                     {
                         Artist artistToAdd = db.Artists.Find(Id);
                         songToChange.SongArtists.Add(artistToAdd);
                     }
                 }
-                if (SelectedGenres != null)
+                if (SelectedGenres != null && SelectedGenres.Count() > 0)
                 {
+                    songToChange.SongGenres.Clear();
                     foreach (Int32 Id in SelectedGenres)
                     {
                         Genre genreToAdd = db.Genres.Find(Id);
                         songToChange.SongGenres.Add(genreToAdd);
                     }
                 }
-                if (SelectedAlbums != null)
+                if (SelectedAlbums != null && SelectedAlbums.Count() > 0)
                 {
+                    songToChange.SongAlbums.Clear();
                     foreach (Int32 Id in SelectedAlbums)
                     {
                         Album albumToAdd = db.Albums.Find(Id);
@@ -305,14 +306,59 @@ namespace LonghornMusic.Controllers
             return RedirectToAction("Index");
         }
 
-        //None of this works; figure out how to make it work 
-        //[HttpPost, ActionName("AddToCart")]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult AddToCart(int Id)
-        //{
-        //    Song song = db.Songs.Find(Id);
+        //Get rid of this once purchase controller is working 
+        //PURCHASE A SONG
+        [HttpPost, ActionName("AddToCart")]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddToCart(int? Id)
+        {
+            Song song = db.Songs.Find(Id);
+            string uid = User.Identity.GetUserId();
+            AppUser user = db.Users.Find(uid);
+
+            ItemDetail ItemDetail = new ItemDetail();
+            decimal PurchasePrice = song.SongPrice;
+            ItemDetail.PurchasePrice = PurchasePrice;
+            ItemDetail.Song = song;
             
-        //}
+            if (user.OrderHistory.Count == 0)
+            {
+                PurchaseUserDetail PurchaseUserDetail = new PurchaseUserDetail();
+                PurchaseUserDetail.Customer = user;
+                
+                Purchase purchase = new Purchase();
+                purchase.IsComplete = false;
+                ItemDetail.Purchase = purchase;
+                purchase.ItemDetails.Add(ItemDetail);
+                PurchaseUserDetail.Purchase = purchase;
+                purchase.PurchaseUserDetail.Add(PurchaseUserDetail);
+            }
+            else
+            {
+                PurchaseUserDetail PurchaseUserDetail = user.OrderHistory[user.OrderHistory.Count - 1];
+                if (PurchaseUserDetail.Purchase.IsComplete == false)
+                {
+                    PurchaseUserDetail.Purchase.ItemDetails.Add(ItemDetail);
+                }
+                else
+                {
+                    PurchaseUserDetail PurchaseUserDetailToAdd = new PurchaseUserDetail();
+                    PurchaseUserDetailToAdd.Customer = user;
+
+                    Purchase Purchase = new Purchase();
+                    Purchase.IsComplete = false;
+                    ItemDetail.Purchase = Purchase;
+                    Purchase.ItemDetails.Add(ItemDetail);
+                    PurchaseUserDetailToAdd.Purchase = Purchase;
+                    Purchase.PurchaseUserDetail.Add(PurchaseUserDetailToAdd);
+                    db.Purchases.Add(Purchase);
+                    db.PurchaseUserDetails.Add(PurchaseUserDetailToAdd);
+
+                }
+            }
+            db.ItemDetails.Add(ItemDetail);
+            return View(song);
+        }
 
         protected override void Dispose(bool disposing)
         {
