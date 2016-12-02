@@ -209,7 +209,7 @@ namespace LonghornMusic.Controllers
                 ItemDetail.Purchase = purchase;
                 purchase.ItemDetails.Add(ItemDetail);
                 PurchaseUserDetail.Purchase = purchase;
-                purchase.PurchaseUserDetail.Add(PurchaseUserDetail);
+                purchase.PurchaseUserDetail = PurchaseUserDetail;
             }
             else
             {
@@ -229,7 +229,7 @@ namespace LonghornMusic.Controllers
                     ItemDetail.Purchase = Purchase;
                     Purchase.ItemDetails.Add(ItemDetail);
                     PurchaseUserDetailToAdd.Purchase = Purchase;
-                    Purchase.PurchaseUserDetail.Add(PurchaseUserDetailToAdd);
+                    Purchase.PurchaseUserDetail = PurchaseUserDetailToAdd;
                     db.Purchases.Add(Purchase);
                     db.PurchaseUserDetails.Add(PurchaseUserDetailToAdd);
 
