@@ -146,6 +146,13 @@ namespace LonghornMusic.Controllers
             return RedirectToAction("UserMenu");
         }
 
+        //Send to AccountDetails
+        [Authorize]
+        public ActionResult UserDetailsGet()
+        {
+            return View("UserDetails");
+        }
+
         //GET: Manage Credit Cards
         [Authorize]
         public ActionResult ChangeInformationGet()
