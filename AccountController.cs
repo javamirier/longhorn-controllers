@@ -150,6 +150,22 @@ namespace LonghornMusic.Controllers
         [Authorize]
         public ActionResult UserDetailsGet()
         {
+            AppUser user = db.Users.Find(User.Identity.GetUserId());
+
+            ViewBag.FName = user.FName;
+            ViewBag.MI = user.MI;
+            ViewBag.LName = user.LName;
+            ViewBag.Email = user.Email;
+            ViewBag.PhoneNumber = user.PhoneNumber;
+            ViewBag.CreditCard1 = user.CreditCard1;
+            ViewBag.CreditCard1Type = user.CreditCard1Type;
+            ViewBag.CreditCard2 = user.CreditCard2;
+            ViewBag.CreditCard2Type = user.CreditCard2Type;
+            ViewBag.Address = user.Address;
+            ViewBag.Zip = user.Zip;
+            ViewBag.City = user.City;
+            ViewBag.State = user.State;
+            
             return View("UserDetails");
         }
 
